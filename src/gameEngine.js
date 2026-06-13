@@ -61,6 +61,8 @@ function getDefaultState() {
       spatial: { correct: 0, total: 0 },
       verbalLogic: { correct: 0, total: 0 },
       sequences: { correct: 0, total: 0 },
+      italiano: { correct: 0, total: 0 },
+      matematica: { correct: 0, total: 0 },
     },
     // Unlocked planets
     planetsUnlocked: ['Mercury'],
@@ -97,6 +99,14 @@ export function getDifficulty(daysPlayed) {
       sequenceLength: Math.min(4 + Math.floor(d / 8), 7),
       operations: d < 5 ? 1 : d < 15 ? 2 : 3, // number of operations in pattern
       includeGeometric: d >= 10,
+    },
+    // Italiano: grammar complexity
+    italiano: {
+      daysPlayed: d,
+    },
+    // Matematica: number complexity
+    matematica: {
+      daysPlayed: d,
     },
   };
 }
@@ -158,13 +168,13 @@ export function generateSession(state) {
   const rng = seededRandom(dayNum * 7919 + state.daysPlayed * 31);
   const diff = getDifficulty(state.daysPlayed);
   
-  // 3 reasoning + 3 spatial + 3 verbal logic + 3 sequences = 12
+  // 2 reasoning + 2 spatial + 3 verbal logic + 3 sequences + 3 italiano + 3 matematica = 16
   const exercises = [];
   
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     exercises.push({ type: 'reasoning', index: i, seed: Math.floor(rng() * 100000) });
   }
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     exercises.push({ type: 'spatial', index: i, seed: Math.floor(rng() * 100000) });
   }
   for (let i = 0; i < 3; i++) {
@@ -172,6 +182,12 @@ export function generateSession(state) {
   }
   for (let i = 0; i < 3; i++) {
     exercises.push({ type: 'sequences', index: i, seed: Math.floor(rng() * 100000) });
+  }
+  for (let i = 0; i < 3; i++) {
+    exercises.push({ type: 'italiano', index: i, seed: Math.floor(rng() * 100000) });
+  }
+  for (let i = 0; i < 3; i++) {
+    exercises.push({ type: 'matematica', index: i, seed: Math.floor(rng() * 100000) });
   }
   
   // Shuffle exercise order (but keep groups loosely together for variety)
@@ -200,6 +216,16 @@ export function getMissionNarrative(exerciseType, planetName) {
       `Il radar rileva un pattern. Qual è il prossimo segnale?`,
       `La rotta di navigazione segue una logica. Dove vai dopo?`,
       `I cristalli energetici seguono una sequenza. Quale viene dopo?`,
+    ],
+    italiano: [
+      `Il diario di bordo ha degli errori! Ripara il testo del capitano.`,
+      `Un messaggio alieno è stato tradotto ma ha errori grammaticali. Correggilo!`,
+      `Per decifrare il codice segreto, devi conoscere bene la lingua!`,
+    ],
+    matematica: [
+      `Il computer di navigazione ha bisogno di calcoli precisi!`,
+      `Per calcolare la rotta serve risolvere questo problema numerico.`,
+      `I sensori hanno rilevato dei dati. Analizza i numeri!`,
     ],
   };
   

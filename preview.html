@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Space Quest">
 <title>Leo's Space Quest 🚀</title>
-<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNwYWNlIFF1ZXN0IC0gTWlzc2lvbmkgQ29nbml0aXZlIiwKICAic2hvcnRfbmFtZSI6ICJTcGFjZSBRdWVzdCIsCiAgImRlc2NyaXB0aW9uIjogIk1pc3Npb25pIGNvZ25pdGl2ZSBnaW9ybmFsaWVyZSBuZWxsbyBzcGF6aW8hIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgInRoZW1lX2NvbG9yIjogIiMwYTBlMjciLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwYTBlMjciLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDUxMiA1MTInJTNFJTNDcmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgcng9JzY0JyBmaWxsPSclMjMwYTBlMjcnLyUzRSUzQ3RleHQgeD0nMjU2JyB5PSczNDAnIGZvbnQtc2l6ZT0nMjgwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyUzRfCfmoAlM0MvdGV4dCUzRSUzQy9zdmclM0UiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFza2FibGUiCiAgICB9CiAgXQp9">
 <style>
 :root {
   --bg-deep: #0a0e27;
@@ -76,7 +75,7 @@ body::before {
   background: var(--bg-card-hover); border: 2px solid var(--border); border-radius: var(--radius-sm);
   padding: 16px; color: var(--text-primary); font-size: 15px; font-weight: 500;
   display: flex; align-items: center; justify-content: center; min-height: 60px;
-  cursor: pointer; transition: all 0.2s ease;
+  cursor: pointer; transition: all 0.2s ease; text-align: center; word-break: break-word;
 }
 .option-btn:hover { border-color: var(--accent-primary); background: rgba(108,99,255,0.1); }
 .option-btn.correct { border-color: var(--accent-secondary); background: rgba(0,212,170,0.15); box-shadow: 0 0 20px rgba(0,212,170,0.3); }
@@ -108,57 +107,58 @@ body::before {
 // === SAFE STORAGE (works even when localStorage is blocked) ===
 let _memStore = {};
 const safeStorage = {
-  getItem(key) { try { return safeStorage.getItem(key); } catch(e) { return _memStore[key] || null; } },
-  setItem(key, val) { try { safeStorage.setItem(key, val); } catch(e) { _memStore[key] = val; } }
+  getItem(key) { try { return localStorage.getItem(key); } catch(e) { return _memStore[key] || null; } },
+  setItem(key, val) { try { localStorage.setItem(key, val); } catch(e) { _memStore[key] = val; } }
 };
 
 // === GAME ENGINE ===
 const STORAGE_KEY = 'leo-space-quest-v1';
 const STATS_KEY = 'leo-space-quest-stats-v1';
-const SHAPES = ['●','■','▲','◆','★','⬟','⬢','◯','□','△'];
+const SHAPES = ['\u25cf','\u25a0','\u25b2','\u25c6','\u2605','\u2b1f','\u2b22','\u25ef','\u25a1','\u25b3'];
 const GEO_SHAPES = [
-  { symbols: ['◢','◣','◤','◥'], name: 'triangle' },
-  { symbols: ['▲','▶','▼','◀'], name: 'arrow' },
-  { symbols: ['┘','└','┐','┌'], name: 'L-shape' },
-  { symbols: ['┴','├','┬','┤'], name: 'T-shape' },
+  { symbols: ['\u25e2','\u25e3','\u25e4','\u25e5'], name: 'triangle' },
+  { symbols: ['\u25b2','\u25b6','\u25bc','\u25c0'], name: 'arrow' },
+  { symbols: ['\u2518','\u2514','\u2510','\u250c'], name: 'L-shape' },
+  { symbols: ['\u2534','\u251c','\u252c','\u2524'], name: 'T-shape' },
 ];
 const OBJECTS = [
-  { object:'🚀 Razzo', essential:['motore','carburante','scudo termico','cabina'], related:['astronauta','rampa','tuta','antenna'], unrelated:['ruote','binari','ancora','pedali'] },
-  { object:'📚 Libro', essential:['pagine','copertina','testo','titolo'], related:['scaffale','biblioteca','segnalibro','autore'], unrelated:['motore','ruote','finestre','radici'] },
-  { object:'🏠 Casa', essential:['muri','tetto','fondamenta','porta'], related:['giardino','garage','cancello','balcone'], unrelated:['ali','pinne','radici','motore'] },
-  { object:'🌳 Albero', essential:['radici','tronco','rami','foglie'], related:['frutti','fiori','ombra','nido'], unrelated:['ruote','finestre','motore','timone'] },
-  { object:'🚗 Auto', essential:['motore','ruote','volante','freni'], related:['fari','specchietti','radio','tergicristalli'], unrelated:['ali','vele','rami','pagine'] },
-  { object:'⛵ Barca a vela', essential:['scafo','vela','albero','timone'], related:['ancora','bussola','salvagente','oblò'], unrelated:['ruote','pedali','binari','foglie'] },
-  { object:'🎸 Chitarra', essential:['corde','manico','cassa armonica','tastiera'], related:['plettro','custodia','amplificatore','accordatore'], unrelated:['ruote','ali','radici','motore'] },
-  { object:'🖥️ Computer', essential:['processore','memoria','schermo','tastiera'], related:['mouse','casse','webcam','stampante'], unrelated:['vele','radici','pedali','timone'] },
-  { object:'🌍 Pianeta', essential:['atmosfera','crosta','nucleo','acqua'], related:['luna','montagne','oceani','vulcani'], unrelated:['motore','ruote','pagine','corde'] },
-  { object:'✈️ Aereo', essential:['ali','motori','fusoliera','coda'], related:['pilota','pista','carrello','finestrini'], unrelated:['radici','vele','pedali','rami'] },
-  { object:'⚽ Calcio', essential:['pallone','giocatori','campo','porte'], related:['arbitro','tifosi','panchina','tabellone'], unrelated:['vele','radici','pagine','motore'] },
-  { object:'🎂 Torta', essential:['farina','uova','zucchero','cottura'], related:['candeline','crema','decorazioni','piatto'], unrelated:['motore','radici','ali','timone'] },
-  // NEW objects covering diverse topics
-  { object:'🌋 Vulcano', essential:['magma','cratere','lava','camino vulcanico'], related:['cenere','terremoti','isola','fumarole'], unrelated:['ruote','pagine','corde','tastiera'] },
-  { object:'🦋 Farfalla', essential:['ali','antenne','proboscide','addome'], related:['fiori','bozzolo','bruco','polline'], unrelated:['ruote','motore','timone','binari'] },
-  { object:'📱 Smartphone', essential:['schermo touch','batteria','processore','antenna'], related:['custodia','caricatore','auricolari','app'], unrelated:['vele','radici','rami','pedali'] },
-  { object:'🤖 Robot', essential:['sensori','attuatori','processore','energia'], related:['braccio meccanico','cavi','programmazione','ruote'], unrelated:['foglie','criniera','vele','pagine'] },
-  { object:'🏀 Pallacanestro', essential:['pallone','canestro','campo','giocatori'], related:['tabellone','arbitro','divisa','cronometro'], unrelated:['vele','radici','motore','timone'] },
-  { object:'🏊 Nuoto', essential:['acqua','piscina','costume','corsie'], related:['occhialini','cuffia','trampolino','cronometro'], unrelated:['ruote','binari','foglie','corde'] },
-  { object:'🎨 Quadro', essential:['tela','colori','pennello','cornice'], related:['cavalletto','museo','artista','vernice'], unrelated:['motore','radici','timone','binari'] },
-  { object:'🎭 Teatro', essential:['palcoscenico','attori','copione','pubblico'], related:['costumi','luci','sipario','regista'], unrelated:['ruote','radici','motore','vele'] },
-  { object:'🔬 Microscopio', essential:['lenti','oculare','obiettivo','piattaforma'], related:['vetrino','laboratorio','colorante','campione'], unrelated:['ruote','vele','criniera','pagine'] },
-  { object:'⚡ Circuito elettrico', essential:['batteria','fili conduttori','interruttore','lampadina'], related:['resistenza','voltmetro','saldatore','presa'], unrelated:['foglie','vele','radici','rami'] },
-  { object:'❤️ Cuore', essential:['ventricoli','atri','valvole','arterie'], related:['sangue','battito','petto','vene'], unrelated:['ruote','pagine','motore','binari'] },
-  { object:'🧠 Cervello', essential:['neuroni','emisferi','corteccia','sinapsi'], related:['cranio','pensiero','memoria','sogni'], unrelated:['ruote','vele','radici','motore'] },
-  { object:'🏔️ Montagna', essential:['vetta','versanti','roccia','altitudine'], related:['neve','sentieri','rifugio','animali'], unrelated:['motore','pagine','corde','tastiera'] },
-  { object:'🏝️ Isola', essential:['terra','acqua circostante','costa','superficie'], related:['spiaggia','palme','porto','faro'], unrelated:['binari','motore','tastiera','pedali'] },
+  { object:'\ud83d\ude80 Razzo', essential:['motore','carburante','scudo termico','cabina'], related:['astronauta','rampa','tuta','antenna'], unrelated:['ruote','binari','ancora','pedali'] },
+  { object:'\ud83d\udcda Libro', essential:['pagine','copertina','testo','titolo'], related:['scaffale','biblioteca','segnalibro','autore'], unrelated:['motore','ruote','finestre','radici'] },
+  { object:'\ud83c\udfe0 Casa', essential:['muri','tetto','fondamenta','porta'], related:['giardino','garage','cancello','balcone'], unrelated:['ali','pinne','radici','motore'] },
+  { object:'\ud83c\udf33 Albero', essential:['radici','tronco','rami','foglie'], related:['frutti','fiori','ombra','nido'], unrelated:['ruote','finestre','motore','timone'] },
+  { object:'\ud83d\ude97 Auto', essential:['motore','ruote','volante','freni'], related:['fari','specchietti','radio','tergicristalli'], unrelated:['ali','vele','rami','pagine'] },
+  { object:'\u26f5 Barca a vela', essential:['scafo','vela','albero','timone'], related:['ancora','bussola','salvagente','obl\u00f2'], unrelated:['ruote','pedali','binari','foglie'] },
+  { object:'\ud83c\udfb8 Chitarra', essential:['corde','manico','cassa armonica','tastiera'], related:['plettro','custodia','amplificatore','accordatore'], unrelated:['ruote','ali','radici','motore'] },
+  { object:'\ud83d\udda5\ufe0f Computer', essential:['processore','memoria','schermo','tastiera'], related:['mouse','casse','webcam','stampante'], unrelated:['vele','radici','pedali','timone'] },
+  { object:'\ud83c\udf0d Pianeta', essential:['atmosfera','crosta','nucleo','acqua'], related:['luna','montagne','oceani','vulcani'], unrelated:['motore','ruote','pagine','corde'] },
+  { object:'\u2708\ufe0f Aereo', essential:['ali','motori','fusoliera','coda'], related:['pilota','pista','carrello','finestrini'], unrelated:['radici','vele','pedali','rami'] },
+  { object:'\u26bd Calcio', essential:['pallone','giocatori','campo','porte'], related:['arbitro','tifosi','panchina','tabellone'], unrelated:['vele','radici','pagine','motore'] },
+  { object:'\ud83c\udf82 Torta', essential:['farina','uova','zucchero','cottura'], related:['candeline','crema','decorazioni','piatto'], unrelated:['motore','radici','ali','timone'] },
+  { object:'\ud83c\udf0b Vulcano', essential:['magma','cratere','lava','camino vulcanico'], related:['cenere','terremoti','isola','fumarole'], unrelated:['ruote','pagine','corde','tastiera'] },
+  { object:'\ud83e\udd8b Farfalla', essential:['ali','antenne','proboscide','addome'], related:['fiori','bozzolo','bruco','polline'], unrelated:['ruote','motore','timone','binari'] },
+  { object:'\ud83d\udcf1 Smartphone', essential:['schermo touch','batteria','processore','antenna'], related:['custodia','caricatore','auricolari','app'], unrelated:['vele','radici','rami','pedali'] },
+  { object:'\ud83e\udd16 Robot', essential:['sensori','attuatori','processore','energia'], related:['braccio meccanico','cavi','programmazione','ruote'], unrelated:['foglie','criniera','vele','pagine'] },
+  { object:'\ud83c\udfc0 Pallacanestro', essential:['pallone','canestro','campo','giocatori'], related:['tabellone','arbitro','divisa','cronometro'], unrelated:['vele','radici','motore','timone'] },
+  { object:'\ud83c\udfca Nuoto', essential:['acqua','piscina','costume','corsie'], related:['occhialini','cuffia','trampolino','cronometro'], unrelated:['ruote','binari','foglie','corde'] },
+  { object:'\ud83c\udfa8 Quadro', essential:['tela','colori','pennello','cornice'], related:['cavalletto','museo','artista','vernice'], unrelated:['motore','radici','timone','binari'] },
+  { object:'\ud83c\udfad Teatro', essential:['palcoscenico','attori','copione','pubblico'], related:['costumi','luci','sipario','regista'], unrelated:['ruote','radici','motore','vele'] },
+  { object:'\ud83d\udd2c Microscopio', essential:['lenti','oculare','obiettivo','piattaforma'], related:['vetrino','laboratorio','colorante','campione'], unrelated:['ruote','vele','criniera','pagine'] },
+  { object:'\u26a1 Circuito elettrico', essential:['batteria','fili conduttori','interruttore','lampadina'], related:['resistenza','voltmetro','saldatore','presa'], unrelated:['foglie','vele','radici','rami'] },
+  { object:'\u2764\ufe0f Cuore', essential:['ventricoli','atri','valvole','arterie'], related:['sangue','battito','petto','vene'], unrelated:['ruote','pagine','motore','binari'] },
+  { object:'\ud83e\udde0 Cervello', essential:['neuroni','emisferi','corteccia','sinapsi'], related:['cranio','pensiero','memoria','sogni'], unrelated:['ruote','vele','radici','motore'] },
+  { object:'\ud83c\udfd4\ufe0f Montagna', essential:['vetta','versanti','roccia','altitudine'], related:['neve','sentieri','rifugio','animali'], unrelated:['motore','pagine','corde','tastiera'] },
+  { object:'\ud83c\udfdd\ufe0f Isola', essential:['terra','acqua circostante','costa','superficie'], related:['spiaggia','palme','porto','faro'], unrelated:['binari','motore','tastiera','pedali'] },
 ];
 const PLANETS = ['Mercury','Venus','Mars','Jupiter','Saturn','Neptune','Pluto'];
-const PLANET_EMOJI = ['☿️','♀️','♂️','♃','♄','♆','⯓'];
+const PLANET_EMOJI = ['\u263f\ufe0f','\u2640\ufe0f','\u2642\ufe0f','\u2643','\u2644','\u2646','\u2bd3'];
 const PLANET_LEVELS = [1,3,5,8,12,16,20];
 const NARRATIVES = {
   reasoning: ['Il computer di bordo ha un glitch! Trova il pattern.','Un segnale alieno contiene un codice. Decifra!','Lo scudo ha perso un pezzo. Quale manca?'],
-  spatial: ['Aggancia il modulo spaziale — trova l\'orientamento giusto!','Un asteroide ruota. Da che lato lo vedi?','La mappa stellare è inclinata. Posizione corretta!'],
-  verbalLogic: ['Cosa serve per questa missione?','Il manuale è danneggiato. Quali parti essenziali?','Prepara l\'equipaggiamento. Cosa è indispensabile?'],
+  spatial: ['Aggancia il modulo spaziale \u2014 trova l\'orientamento giusto!','Un asteroide ruota. Da che lato lo vedi?','La mappa stellare \u00e8 inclinata. Posizione corretta!'],
+  verbalLogic: ['Cosa serve per questa missione?','Il manuale \u00e8 danneggiato. Quali parti essenziali?','Prepara l\'equipaggiamento. Cosa \u00e8 indispensabile?'],
   sequences: ['Il radar rileva un pattern. Prossimo segnale?','La rotta segue una logica. Dove vai?','I cristalli energetici. Quale viene dopo?'],
+  italiano: ['Il diario di bordo ha degli errori! Ripara il testo.','Un messaggio alieno tradotto ha errori grammaticali!','Per decifrare il codice serve conoscere la lingua!'],
+  matematica: ['Il computer di navigazione ha bisogno di calcoli precisi!','Per calcolare la rotta serve risolvere questo problema.','I sensori hanno rilevato dei dati. Analizza i numeri!'],
 };
 
 function seededRng(seed) { let s = seed; return () => { s=(s*1664525+1013904223)&0xFFFFFFFF; return (s>>>0)/0xFFFFFFFF; }; }
@@ -167,7 +167,7 @@ function getDayNum() { return Math.floor(Date.now()/(1000*60*60*24)); }
 function getLevel(xp) { let l=1,t=100,r=xp; while(r>=t){r-=t;l++;t=Math.floor(t*1.3);} return {level:l,inLevel:r,forNext:t}; }
 function getPlanet(level) { let p=0; for(let i=0;i<PLANET_LEVELS.length;i++) if(level>=PLANET_LEVELS[i]) p=i; return {name:PLANETS[p],emoji:PLANET_EMOJI[p]}; }
 
-// Safe storage wrapper (handles iframe sandbox)
+// Safe storage wrapper
 let _memoryStore = {};
 function safeGet(key) { try { return safeStorage.getItem(key); } catch(e) { return _memoryStore[key]||null; } }
 function safeSet(key, val) { try { safeStorage.setItem(key, val); } catch(e) { _memoryStore[key]=val; } }
@@ -178,10 +178,9 @@ function loadState() {
 }
 function saveState(s) { try { safeSet(STORAGE_KEY, JSON.stringify(s)); } catch(e){} }
 
-// Stats per area
 function loadStats() {
   try { const s=safeGet(STATS_KEY); if(s) return JSON.parse(s); } catch(e){}
-  return { reasoning:{correct:0,total:0}, spatial:{correct:0,total:0}, verbalLogic:{correct:0,total:0}, sequences:{correct:0,total:0} };
+  return { reasoning:{correct:0,total:0}, spatial:{correct:0,total:0}, verbalLogic:{correct:0,total:0}, sequences:{correct:0,total:0}, italiano:{correct:0,total:0}, matematica:{correct:0,total:0} };
 }
 function saveStats(s) { try { safeSet(STATS_KEY, JSON.stringify(s)); } catch(e){} }
 
@@ -189,7 +188,7 @@ function saveStats(s) { try { safeSet(STATS_KEY, JSON.stringify(s)); } catch(e){
 function genReasoning(seed, day) {
   const rng = seededRng(seed);
   const patterns = [
-    () => { // Row same
+    () => { // Row same (Latin square)
       const pool = shuffle(SHAPES.slice(0,6),rng);
       const grid = [[pool[0],pool[1],pool[2]],[pool[1],pool[2],pool[0]],[pool[2],pool[0],'?']];
       const answer = pool[1];
@@ -218,8 +217,7 @@ function genReasoning(seed, day) {
       const opts = shuffle([answer,String(nums[8]+step),String(nums[8]-step),String(nums[8]+1)],rng);
       return {grid,answer,options:opts};
     },
-    // NEW: Row sum pattern
-    () => {
+    () => { // Row sum
       const total = Math.floor(rng()*5)+9;
       const r1a=Math.floor(rng()*3)+1, r1b=Math.floor(rng()*3)+2, r1c=total-r1a-r1b;
       const r2a=Math.floor(rng()*3)+2, r2b=Math.floor(rng()*3)+1, r2c=total-r2a-r2b;
@@ -230,8 +228,7 @@ function genReasoning(seed, day) {
       while(opts.length<4){const d=String(r3c+Math.floor(rng()*5)-2);if(!opts.includes(d)&&parseInt(d)>0) opts.push(d);}
       return {grid,answer,options:shuffle(opts,rng)};
     },
-    // NEW: Subtraction pattern
-    () => {
+    () => { // Subtraction pattern
       const start=Math.floor(rng()*3)+8, sub1=Math.floor(rng()*2)+1, sub2=Math.floor(rng()*2)+2;
       const grid = [
         [String(start),String(start-sub1),String(start-sub1-sub2)],
@@ -243,8 +240,7 @@ function genReasoning(seed, day) {
       while(opts.length<4){const d=String(parseInt(answer)+Math.floor(rng()*5)-2);if(!opts.includes(d)&&parseInt(d)>0) opts.push(d);}
       return {grid,answer,options:shuffle(opts,rng)};
     },
-    // NEW: Cyclic shift pattern
-    () => {
+    () => { // Cyclic shift
       const pool = shuffle(SHAPES.slice(0,5),rng);
       const grid = [[pool[0],pool[1],pool[2]],[pool[2],pool[0],pool[1]],[pool[1],pool[2],'?']];
       const answer = pool[0];
@@ -280,50 +276,270 @@ function genVerbalLogic(seed, day) {
 
 function genSequence(seed, day) {
   const rng = seededRng(seed);
-  const type = Math.floor(rng()*7); // expanded from 4 to 7 types
+  const type = Math.floor(rng()*7);
   let seq, answer, hint;
-  if (type === 0) { // arithmetic
+  if (type === 0) {
     const start=Math.floor(rng()*5)+1, step=Math.floor(rng()*4)+2;
     seq=[]; for(let i=0;i<5;i++) seq.push(start+i*step);
     answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint=`Regola: +${step}`;
-  } else if (type === 1) { // geometric
+  } else if (type === 1) {
     const start=Math.floor(rng()*3)+1, ratio=Math.floor(rng()*2)+2;
     seq=[start]; for(let i=1;i<5;i++) seq.push(seq[i-1]*ratio);
-    answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint=`Regola: ×${ratio}`;
-  } else if (type === 2) { // fibonacci-like
+    answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint=`Regola: \u00d7${ratio}`;
+  } else if (type === 2) {
     const a=Math.floor(rng()*3)+1, b=Math.floor(rng()*3)+2;
     seq=[a,b]; for(let i=2;i<6;i++) seq.push(seq[i-1]+seq[i-2]);
     answer=String(seq[5]); seq=seq.slice(0,5).map(String); hint='Somma dei due precedenti!';
-  } else if (type === 3) { // shape pattern
-    const shapes=['🔴','🔵','🟡','🟢','⭐']; const pool=shuffle(shapes,rng).slice(0,3);
+  } else if (type === 3) {
+    const shapes=['\ud83d\udd34','\ud83d\udd35','\ud83d\udfe1','\ud83d\udfe2','\u2b50']; const pool=shuffle(shapes,rng).slice(0,3);
     const period=Math.floor(rng()*2)+2; seq=[];
     for(let i=0;i<6;i++) seq.push(pool[i%period]);
     answer=seq[5]; seq=seq.slice(0,5); hint=`Pattern di ${period} elementi!`;
-  } else if (type === 4) { // NEW: Square numbers
+  } else if (type === 4) {
     const offset=Math.floor(rng()*2);
     seq=[]; for(let i=0;i<5;i++) seq.push((i+1+offset)*(i+1+offset));
-    answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint='Numeri quadrati! (1×1, 2×2, 3×3...)';
-  } else if (type === 5) { // NEW: Alternating operations (+a, ×2, +a, ×2...)
+    answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint='Numeri quadrati! (1\u00d71, 2\u00d72, 3\u00d73...)';
+  } else if (type === 5) {
     const start=Math.floor(rng()*3)+1, addVal=Math.floor(rng()*3)+1;
     seq=[start]; for(let i=1;i<6;i++) { seq.push(i%2===1 ? seq[i-1]+addVal : seq[i-1]*2); }
-    answer=String(seq[5]); seq=seq.slice(0,5).map(String); hint=`Operazioni alternate: +${addVal} e ×2!`;
-  } else { // NEW: Triangular numbers
+    answer=String(seq[5]); seq=seq.slice(0,5).map(String); hint=`Operazioni alternate: +${addVal} e \u00d72!`;
+  } else {
     const offset=Math.floor(rng()*2);
     seq=[]; for(let i=0;i<5;i++){ const n=i+1+offset; seq.push((n*(n+1))/2); }
     answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint='Numeri triangolari! Il passo cresce di 1.';
   }
-  // Options
   const rng2=seededRng(seed+99);
   let opts=[answer];
   if(typeof answer==='string' && !isNaN(answer)) {
     const n=parseInt(answer);
     [n+1,n-1,n+2,n*2,n-2,n+3].forEach(v=>{if(!opts.includes(String(v))&&v>0) opts.push(String(v));});
   } else {
-    const shapes=['🔴','🔵','🟡','🟢','⭐','💎'];
+    const shapes=['\ud83d\udd34','\ud83d\udd35','\ud83d\udfe1','\ud83d\udfe2','\u2b50','\ud83d\udc8e'];
     shapes.forEach(s=>{if(!opts.includes(s)&&opts.length<4) opts.push(s);});
   }
   opts=shuffle(opts.slice(0,4),rng2);
   return { type:'sequences', sequence:seq, answer, options:opts, hint };
+}
+
+// === ITALIANO GENERATOR ===
+const ANALISI_LOGICA = [
+  { frase:"Il gatto dorme sul divano.", domanda:"Qual \u00e8 il SOGGETTO?", answer:"Il gatto", options:["Il gatto","dorme","sul divano","il divano"], hint:"Il soggetto \u00e8 chi compie l'azione." },
+  { frase:"Marco mangia una mela.", domanda:"Qual \u00e8 il PREDICATO?", answer:"mangia", options:["Marco","mangia","una mela","mela"], hint:"Il predicato \u00e8 l'azione." },
+  { frase:"La maestra spiega la lezione.", domanda:"Qual \u00e8 il COMPLEMENTO OGGETTO?", answer:"la lezione", options:["La maestra","spiega","la lezione","la"], hint:"Risponde a: che cosa?" },
+  { frase:"I bambini giocano nel parco.", domanda:"Qual \u00e8 il SOGGETTO?", answer:"I bambini", options:["I bambini","giocano","nel parco","il parco"], hint:"Chi compie l'azione?" },
+  { frase:"Il treno parte dalla stazione.", domanda:"Qual \u00e8 il COMPLEMENTO DI LUOGO?", answer:"dalla stazione", options:["Il treno","parte","dalla stazione","dalla"], hint:"Risponde a: da dove?" },
+  { frase:"Lucia legge un libro interessante.", domanda:"Qual \u00e8 il PREDICATO?", answer:"legge", options:["Lucia","legge","un libro","interessante"], hint:"Il predicato indica l'azione." },
+  { frase:"Mia sorella studia matematica.", domanda:"Qual \u00e8 il SOGGETTO?", answer:"Mia sorella", options:["Mia sorella","studia","matematica","mia"], hint:"Il soggetto \u00e8 chi compie l'azione." },
+  { frase:"Il cane abbaia forte.", domanda:"Qual \u00e8 il COMPLEMENTO DI MODO?", answer:"forte", options:["Il cane","abbaia","forte","il"], hint:"Risponde a: come?" },
+  { frase:"Ieri ho regalato un libro a Giovanni.", domanda:"Qual \u00e8 il COMPLEMENTO DI TERMINE?", answer:"a Giovanni", options:["Ieri","un libro","a Giovanni","ho regalato"], hint:"Risponde a: a chi?" },
+  { frase:"La nonna prepara la cena in cucina.", domanda:"Qual \u00e8 il COMPLEMENTO DI LUOGO?", answer:"in cucina", options:["La nonna","la cena","in cucina","prepara"], hint:"Dove avviene l'azione?" },
+  { frase:"Durante l'estate, i ragazzi vanno al mare.", domanda:"Qual \u00e8 il COMPLEMENTO DI TEMPO?", answer:"Durante l'estate", options:["Durante l'estate","i ragazzi","vanno","al mare"], hint:"Quando avviene l'azione?" },
+  { frase:"Il professore corregge i compiti con attenzione.", domanda:"Qual \u00e8 il COMPLEMENTO DI MODO?", answer:"con attenzione", options:["Il professore","corregge","i compiti","con attenzione"], hint:"Come viene svolta?" },
+  { frase:"Per la pioggia, la partita \u00e8 stata rinviata.", domanda:"Qual \u00e8 il COMPLEMENTO DI CAUSA?", answer:"Per la pioggia", options:["Per la pioggia","la partita","\u00e8 stata rinviata","rinviata"], hint:"Perch\u00e9?" },
+  { frase:"Marco studia con i suoi compagni in biblioteca.", domanda:"Qual \u00e8 il COMPLEMENTO DI COMPAGNIA?", answer:"con i suoi compagni", options:["Marco","studia","con i suoi compagni","in biblioteca"], hint:"Con chi?" },
+];
+const VERBI_DB = [
+  { frase:"Io mangio la pasta.", domanda:"In che tempo \u00e8 il verbo 'mangio'?", answer:"Presente indicativo", options:["Presente indicativo","Passato prossimo","Imperfetto","Futuro"] },
+  { frase:"Ieri sono andato al cinema.", domanda:"In che tempo \u00e8 il verbo?", answer:"Passato prossimo", options:["Presente","Passato prossimo","Imperfetto","Futuro"] },
+  { frase:"Da bambino giocavo sempre a calcio.", domanda:"In che tempo \u00e8 'giocavo'?", answer:"Imperfetto", options:["Presente","Passato prossimo","Imperfetto","Passato remoto"] },
+  { frase:"Domani andremo in montagna.", domanda:"In che tempo \u00e8 'andremo'?", answer:"Futuro semplice", options:["Presente","Passato prossimo","Futuro semplice","Condizionale"] },
+  { frase:"Domani io ___ al parco.", domanda:"Completa con il verbo corretto:", answer:"andr\u00f2", options:["andr\u00f2","vado","andai","andassi"] },
+  { frase:"Se potessi, ___ in vacanza.", domanda:"Completa:", answer:"andrei", options:["andrei","vado","andr\u00f2","andavo"] },
+  { frase:"Ieri Maria ___ un bel voto.", domanda:"Completa:", answer:"ha preso", options:["ha preso","prende","prender\u00e0","prendeva"] },
+  { frase:"Quando ero piccolo, ___ molto.", domanda:"Completa:", answer:"dormivo", options:["dormivo","dormo","dormii","dormir\u00f2"] },
+  { frase:"Se ___ bel tempo, usciamo.", domanda:"Completa:", answer:"fa", options:["fa","far\u00e0","faceva","facesse"] },
+  { frase:"L'anno prossimo ___ la prima media.", domanda:"Completa:", answer:"frequenter\u00f2", options:["frequenter\u00f2","frequento","frequentavo","frequentai"] },
+  { frase:"Vorrei che tu ___ pi\u00f9 attento.", domanda:"Completa:", answer:"fossi", options:["fossi","sei","eri","sarai"] },
+  { frase:"Penso che Maria ___ simpatica.", domanda:"Completa:", answer:"sia", options:["sia","\u00e8","era","sar\u00e0"] },
+];
+const CONNETTIVI_DB = [
+  { f1:"Ho studiato molto", f2:"ho preso un bel voto.", answer:"quindi", options:["quindi","per\u00f2","sebbene","oppure"] },
+  { f1:"Piove forte", f2:"esco lo stesso.", answer:"per\u00f2", options:["quindi","per\u00f2","perch\u00e9","inoltre"] },
+  { f1:"Studio tanto", f2:"voglio essere promosso.", answer:"perch\u00e9", options:["perch\u00e9","per\u00f2","quindi","inoltre"] },
+  { f1:"Mi piace leggere", f2:"mi piace disegnare.", answer:"e inoltre", options:["e inoltre","per\u00f2","quindi","perch\u00e9"] },
+  { f1:"Puoi venire a casa mia", f2:"possiamo andare al parco.", answer:"oppure", options:["oppure","quindi","perch\u00e9","inoltre"] },
+  { f1:"Non ho fame", f2:"manger\u00f2 un po' di frutta.", answer:"tuttavia", options:["tuttavia","perch\u00e9","quindi","oppure"] },
+  { f1:"Il cielo era coperto", f2:"non ha piovuto.", answer:"ma", options:["ma","quindi","perch\u00e9","anche"] },
+  { f1:"Devi allenarti", f2:"vuoi migliorare.", answer:"se", options:["se","perch\u00e9","quindi","ma"] },
+  { f1:"Studio ogni giorno", f2:"possa migliorare.", answer:"affinch\u00e9", options:["affinch\u00e9","perch\u00e9","tuttavia","dunque"] },
+  { f1:"___ fosse stanco", f2:"ha continuato a giocare.", answer:"Sebbene", options:["Sebbene","Perch\u00e9","Quindi","Dato che"] },
+  { f1:"___ piove", f2:"restiamo a casa.", answer:"Dato che", options:["Dato che","Sebbene","Affinch\u00e9","Tuttavia"] },
+];
+const ORTOGRAFIA_DB = [
+  { d:"Quale forma \u00e8 corretta?", answer:"qual \u00e8", options:["qual \u00e8","qual'\u00e8"] },
+  { d:"Quale forma \u00e8 corretta?", answer:"un amico", options:["un amico","un'amico"] },
+  { d:"Quale forma \u00e8 corretta?", answer:"un'amica", options:["un'amica","un amica"] },
+  { d:"Quale forma \u00e8 corretta?", answer:"c'\u00e8", options:["c'\u00e8","ce"] },
+  { d:"Quale forma \u00e8 corretta?", answer:"ce ne sono", options:["ce ne sono","c'\u00e8 ne sono","cene sono"] },
+  { d:"Quale frase \u00e8 corretta?", answer:"L'ho visto ieri.", options:["L'ho visto ieri.","Lo visto ieri.","Lho visto ieri."] },
+  { d:"Quale forma indica un luogo?", answer:"l\u00ec", options:["l\u00ec","li"] },
+  { d:"Quale forma indica un luogo?", answer:"l\u00e0", options:["l\u00e0","la"] },
+  { d:"Quale forma \u00e8 corretta?", answer:"perch\u00e9", options:["perch\u00e9","perc\u00e8","per che"] },
+  { d:"Quale forma \u00e8 corretta?", answer:"d'accordo", options:["d'accordo","daccordo","d' accordo"] },
+  { d:"Quale forma \u00e8 corretta?", answer:"soprattutto", options:["soprattutto","sopratutto","sopra tutto"] },
+  { d:"Quale frase \u00e8 corretta?", answer:"Ce l'ho fatta!", options:["Ce l'ho fatta!","C'\u00e8 l'ho fatta!","Ce lo fatta!"] },
+  { d:"Quale forma \u00e8 corretta?", answer:"accelerare", options:["accelerare","accellerare","acellerare"] },
+];
+const SINONIMI_DB = [
+  { p:"felice", answer:"contento", options:["contento","triste","arrabbiato","stanco"] },
+  { p:"grande", answer:"enorme", options:["enorme","piccolo","stretto","leggero"] },
+  { p:"veloce", answer:"rapido", options:["rapido","lento","pesante","largo"] },
+  { p:"parlare", answer:"dire", options:["dire","tacere","scrivere","correre"] },
+  { p:"bello", answer:"splendido", options:["splendido","brutto","alto","scuro"] },
+  { p:"paura", answer:"timore", options:["timore","coraggio","gioia","noia"] },
+  { p:"iniziare", answer:"cominciare", options:["cominciare","finire","dormire","perdere"] },
+  { p:"casa", answer:"abitazione", options:["abitazione","strada","scuola","giardino"] },
+  { p:"coraggioso", answer:"valoroso", options:["valoroso","pauroso","prudente","pigro"] },
+  { p:"furbo", answer:"astuto", options:["astuto","stupido","onesto","gentile"] },
+  { p:"sbaglio", answer:"errore", options:["errore","successo","risultato","compito"] },
+  { p:"aiutare", answer:"soccorrere", options:["soccorrere","abbandonare","ignorare","disturbare"] },
+  { p:"ostacolo", answer:"impedimento", options:["impedimento","aiuto","vantaggio","soluzione"] },
+  { p:"prudente", answer:"cauto", options:["cauto","impulsivo","coraggioso","distratto"] },
+  { p:"conseguenza", answer:"effetto", options:["effetto","causa","inizio","dubbio"] },
+  { p:"indifferente", answer:"apatico", options:["apatico","appassionato","curioso","attento"] },
+];
+
+function genItaliano(seed, day) {
+  const rng = seededRng(seed);
+  const typeRoll = rng();
+  if(typeRoll<0.22) {
+    const pool = day<10 ? ANALISI_LOGICA.slice(0,8) : ANALISI_LOGICA;
+    const item = pool[Math.floor(rng()*pool.length)];
+    return { type:'italiano', question:item.frase, instruction:item.domanda, answer:item.answer, options:shuffle([...item.options],rng), hint:item.hint };
+  }
+  if(typeRoll<0.44) {
+    const pool = day<10 ? VERBI_DB.slice(0,8) : VERBI_DB;
+    const item = pool[Math.floor(rng()*pool.length)];
+    return { type:'italiano', question:item.frase, instruction:item.domanda, answer:item.answer, options:shuffle([...item.options],rng), hint:'' };
+  }
+  if(typeRoll<0.62) {
+    const pool = day<10 ? CONNETTIVI_DB.slice(0,5) : CONNETTIVI_DB;
+    const item = pool[Math.floor(rng()*pool.length)];
+    return { type:'italiano', question:`"${item.f1} ___ ${item.f2}"`, instruction:"Scegli il connettivo corretto:", answer:item.answer, options:shuffle([...item.options],rng), hint:'' };
+  }
+  if(typeRoll<0.80) {
+    const pool = day<10 ? ORTOGRAFIA_DB.slice(0,7) : ORTOGRAFIA_DB;
+    const item = pool[Math.floor(rng()*pool.length)];
+    return { type:'italiano', question:item.d, instruction:"Scegli la forma corretta:", answer:item.answer, options:shuffle([...item.options],rng), hint:'' };
+  }
+  const pool = day<10 ? SINONIMI_DB.slice(0,8) : SINONIMI_DB;
+  const item = pool[Math.floor(rng()*pool.length)];
+  return { type:'italiano', question:`"${item.p}"`, instruction:"Trova il SINONIMO:", answer:item.answer, options:shuffle([...item.options],rng), hint:'' };
+}
+
+// === MATEMATICA GENERATOR ===
+function genMatematica(seed, day) {
+  const rng = seededRng(seed);
+  const typeRoll = rng();
+  
+  if(typeRoll < 0.2) return genMedia(rng, day);
+  if(typeRoll < 0.4) return genConversione(rng, day);
+  if(typeRoll < 0.6) return genTabella(rng, day);
+  if(typeRoll < 0.8) return genRelazioni(rng, day);
+  return genRappresentazioni(rng, day);
+}
+
+function genMedia(rng, day) {
+  const count = day < 7 ? 3 : day < 15 ? 4 : 5;
+  const avg = Math.floor(rng() * 8) + 3;
+  const values = [];
+  let sum = 0;
+  for (let i = 0; i < count - 1; i++) {
+    const offset = Math.floor(rng() * 5) - 2;
+    values.push(avg + offset);
+    sum += avg + offset;
+  }
+  values.push(avg * count - sum);
+  sum = avg * count;
+  const displayed = shuffle(values, rng);
+  const answer = String(avg);
+  let opts = [answer, String(avg+1), String(avg-1), String(Math.floor(sum/(count-1)))];
+  opts = [...new Set(opts)].slice(0,4);
+  while(opts.length<4) opts.push(String(avg + Math.floor(rng()*4)+2));
+  const ctx = day<10 
+    ? `In ${count} giorni hai percorso: ${displayed.join(', ')} km al giorno.`
+    : `Temperature rilevate: ${displayed.join('°, ')}°.`;
+  return { type:'matematica', question:`${ctx}\nQual è la media?`, answer, options:shuffle(opts,rng), hint:`Media = somma ÷ quantità (${sum}÷${count}=${avg})` };
+}
+
+function genConversione(rng, day) {
+  const convs = [
+    {from:'km',to:'m',factor:1000},{from:'m',to:'cm',factor:100},{from:'cm',to:'mm',factor:10},
+    {from:'kg',to:'g',factor:1000},{from:'l',to:'ml',factor:1000},{from:'ore',to:'minuti',factor:60},
+    {from:'minuti',to:'secondi',factor:60}
+  ];
+  const inv = [{from:'m',to:'km',factor:0.001},{from:'g',to:'kg',factor:0.001},{from:'ml',to:'l',factor:0.001},{from:'cm',to:'m',factor:0.01}];
+  const pool = day < 10 ? convs : [...convs, ...inv];
+  const c = pool[Math.floor(rng()*pool.length)];
+  let value, correct;
+  if(c.factor>=1) { value=Math.floor(rng()*5)+1; correct=value*c.factor; }
+  else { const div=Math.round(1/c.factor); value=div*(Math.floor(rng()*4)+1); correct=value*c.factor; }
+  const answer = String(correct);
+  let opts = [answer, String(correct*10), String(correct/10), String(value)];
+  opts = [...new Set(opts.filter(o=>parseFloat(o)>0))].slice(0,4);
+  while(opts.length<4) opts.push(String(correct+Math.floor(rng()*100)));
+  return { type:'matematica', question:`Il razzo deve percorrere ${value} ${c.from}. Quanti ${c.to} sono?`, answer, options:shuffle(opts,rng), hint:`1 ${c.from} = ${c.factor>=1?c.factor:'1/'+Math.round(1/c.factor)} ${c.to}` };
+}
+
+function genTabella(rng, day) {
+  const days = ['Lun','Mar','Mer','Gio','Ven'];
+  const temps = days.map(()=>Math.floor(rng()*15)+10);
+  const maxI = temps.indexOf(Math.max(...temps));
+  const minI = temps.indexOf(Math.min(...temps));
+  const total = temps.reduce((a,b)=>a+b,0);
+  const qType = Math.floor(rng()*4);
+  let q, answer, opts;
+  if(qType===0) { q='Giorno più caldo?'; answer=days[maxI]; opts=shuffle([...days],rng).slice(0,4); }
+  else if(qType===1) { q='Giorno più freddo?'; answer=days[minI]; opts=shuffle([...days],rng).slice(0,4); }
+  else if(qType===2) { q='Differenza tra il più caldo e il più freddo?'; answer=String(temps[maxI]-temps[minI]); opts=shuffle([answer,String(temps[maxI]-temps[minI]+1),String(temps[maxI]-temps[minI]-1),String(temps[maxI])],rng); }
+  else { q='Qual è la media delle temperature?'; const avg=Math.floor(total/5); answer=String(avg); opts=shuffle([answer,String(avg+1),String(avg-1),String(temps[maxI])],rng); }
+  if(!opts.includes(answer)) opts[0]=answer;
+  const table = days.map((d,i)=>`${d}:${temps[i]}°`).join(' | ');
+  return { type:'matematica', question:`Stazione meteo:\n${table}\n\n${q}`, answer, options:shuffle(opts,rng), hint:'Leggi i valori e calcola!' };
+}
+
+function genRelazioni(rng, day) {
+  const a = Math.floor(rng()*40)+20;
+  const b = Math.floor(rng()*40)+20;
+  const diff = Math.abs(a-b);
+  const qType = Math.floor(rng()*3);
+  let question, answer, opts;
+  if(qType===0) {
+    question = `Base Marte: ${a} litri O₂/giorno. Base Giove: ${b} litri. Differenza?`;
+    answer = String(diff);
+    opts = shuffle([String(diff), String(diff+2), String(a+b), String(Math.max(a,b))], rng);
+  } else if(qType===1) {
+    const vals = [a, b, a+10, b+10];
+    const sum = vals.reduce((s,v)=>s+v,0);
+    question = `Campioni raccolti: ${vals.join(', ')}. Totale?`;
+    answer = String(sum);
+    opts = shuffle([String(sum), String(sum+10), String(sum-10), String(Math.floor(sum/4))], rng);
+  } else {
+    const threshold = Math.min(a,b) + 5;
+    const vals = [a, b, a-5, b+3];
+    const above = vals.filter(v=>v>threshold).length;
+    question = `Valori: ${vals.join(', ')}. Quanti sono maggiori di ${threshold}?`;
+    answer = String(above);
+    opts = shuffle([String(above), String(above+1), String(above>0?above-1:above+2), String(vals.length)], rng);
+  }
+  if(!opts.includes(answer)) opts[0]=answer;
+  return { type:'matematica', question, answer, options:shuffle(opts.slice(0,4),rng), hint:'Confronta i valori uno per uno!' };
+}
+
+function genRappresentazioni(rng, day) {
+  const labels = ['Ferro','Rame','Oro','Argento'];
+  const values = labels.map(()=>Math.floor(rng()*8)+2);
+  const chart = labels.map((l,i)=>`${l}: ${'█'.repeat(values[i])} (${values[i]})`).join('\n');
+  const maxI = values.indexOf(Math.max(...values));
+  const minI = values.indexOf(Math.min(...values));
+  const total = values.reduce((a,b)=>a+b,0);
+  const qType = Math.floor(rng()*3);
+  let q, answer, opts;
+  if(qType===0) { q='Minerale più trovato?'; answer=labels[maxI]; opts=shuffle([...labels],rng); }
+  else if(qType===1) { q='Totale minerali?'; answer=String(total); opts=shuffle([String(total),String(total+2),String(total-1),String(Math.max(...values)*4)],rng); }
+  else { q=`Differenza tra ${labels[maxI]} e ${labels[minI]}?`; const d=values[maxI]-values[minI]; answer=String(d); opts=shuffle([String(d),String(d+1),String(values[maxI]),String(d-1<0?d+2:d-1)],rng); }
+  if(!opts.includes(answer)) opts[0]=answer;
+  return { type:'matematica', question:`Minerali trovati:\n${chart}\n\n${q}`, answer, options:shuffle(opts.slice(0,4),rng), hint:'Leggi dal grafico e calcola!' };
 }
 
 // === RENDER ===
@@ -348,10 +564,12 @@ if (state.completedToday) screen = 'completed';
 function generateExercises() {
   const rng = seededRng(today * 7919 + state.daysPlayed * 31);
   exercises = [];
-  for(let i=0;i<3;i++) exercises.push({gen:genReasoning, seed:Math.floor(rng()*99999)});
-  for(let i=0;i<3;i++) exercises.push({gen:genSpatial, seed:Math.floor(rng()*99999)});
+  for(let i=0;i<2;i++) exercises.push({gen:genReasoning, seed:Math.floor(rng()*99999)});
+  for(let i=0;i<2;i++) exercises.push({gen:genSpatial, seed:Math.floor(rng()*99999)});
   for(let i=0;i<3;i++) exercises.push({gen:genVerbalLogic, seed:Math.floor(rng()*99999)});
   for(let i=0;i<3;i++) exercises.push({gen:genSequence, seed:Math.floor(rng()*99999)});
+  for(let i=0;i<3;i++) exercises.push({gen:genItaliano, seed:Math.floor(rng()*99999)});
+  for(let i=0;i<3;i++) exercises.push({gen:genMatematica, seed:Math.floor(rng()*99999)});
   exercises = shuffle(exercises, rng);
 }
 
@@ -362,13 +580,13 @@ function render() {
   let html = `<div class="header">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:24px">🚀</span>
+        <span style="font-size:24px">\ud83d\ude80</span>
         <div><div style="font-size:14px;color:var(--accent-gold);font-weight:700">Livello ${level}</div>
         <div style="font-size:11px;color:var(--text-secondary)">Pianeta: ${planet.name} ${planet.emoji}</div></div>
       </div>
       <div style="text-align:right">
         <div style="font-size:14px;color:var(--accent-gold);font-weight:700">${state.totalXP} XP</div>
-        <div style="font-size:11px;color:var(--text-secondary)">🔥 ${state.streak} giorni</div>
+        <div style="font-size:11px;color:var(--text-secondary)">\ud83d\udd25 ${state.streak} giorni</div>
       </div>
     </div>
     <div class="xp-bar"><div class="xp-fill" style="width:${(inLevel/forNext)*100}%"></div></div>
@@ -377,97 +595,89 @@ function render() {
   
   if (screen === 'welcome') {
     html += `<div class="card" style="text-align:center">
-      <div style="font-size:64px;margin-bottom:16px">🚀</div>
+      <div style="font-size:64px;margin-bottom:16px">\ud83d\ude80</div>
       <h1 style="font-size:22px;color:var(--accent-primary);margin-bottom:8px">Space Quest</h1>
       <p style="color:var(--text-secondary);margin-bottom:24px;font-size:14px">Missione giornaliera su ${planet.name} ${planet.emoji}</p>
       ${state.streak > 0 ? `<div style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px">
-        <span style="font-size:20px">🔥</span><span style="color:var(--accent-gold);font-weight:600;margin-left:8px">${state.streak} giorni consecutivi!</span>
+        <span style="font-size:20px">\ud83d\udd25</span><span style="color:var(--accent-gold);font-weight:600;margin-left:8px">${state.streak} giorni consecutivi!</span>
       </div>` : ''}
-      <button class="btn-primary" onclick="startMission()">🛸 Inizia la Missione</button>
-      <button class="btn-stats" onclick="showStats()">📊 Statistiche</button>
+      <button class="btn-primary" onclick="startMission()">\ud83d\udef8 Inizia la Missione</button>
+      <button class="btn-stats" onclick="showStats()">\ud83d\udcca Statistiche</button>
       <div style="margin-top:24px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
-        <div class="stat-box"><div style="font-size:18px">📋</div><div style="font-size:16px;font-weight:700">${state.daysPlayed}</div><div style="font-size:10px;color:var(--text-muted)">Missioni</div></div>
-        <div class="stat-box"><div style="font-size:18px">⭐</div><div style="font-size:16px;font-weight:700">${level}</div><div style="font-size:10px;color:var(--text-muted)">Livello</div></div>
-        <div class="stat-box"><div style="font-size:18px">💎</div><div style="font-size:16px;font-weight:700">${state.totalXP}</div><div style="font-size:10px;color:var(--text-muted)">XP Totali</div></div>
-        <div class="stat-box"><div style="font-size:18px">🔥</div><div style="font-size:16px;font-weight:700">${state.streak}</div><div style="font-size:10px;color:var(--text-muted)">Streak</div></div>
+        <div class="stat-box"><div style="font-size:18px">\ud83d\udccb</div><div style="font-size:16px;font-weight:700">${state.daysPlayed}</div><div style="font-size:10px;color:var(--text-muted)">Missioni</div></div>
+        <div class="stat-box"><div style="font-size:18px">\u2b50</div><div style="font-size:16px;font-weight:700">${level}</div><div style="font-size:10px;color:var(--text-muted)">Livello</div></div>
+        <div class="stat-box"><div style="font-size:18px">\ud83d\udc8e</div><div style="font-size:16px;font-weight:700">${state.totalXP}</div><div style="font-size:10px;color:var(--text-muted)">XP Totali</div></div>
+        <div class="stat-box"><div style="font-size:18px">\ud83d\udd25</div><div style="font-size:16px;font-weight:700">${state.streak}</div><div style="font-size:10px;color:var(--text-muted)">Streak</div></div>
       </div>
     </div>`;
   } else if (screen === 'stats') {
     const areas = [
-      {key:'reasoning', label:'🧩 Ragionamento', color:'#6c63ff'},
-      {key:'spatial', label:'🔄 Spazio', color:'#00d4aa'},
-      {key:'verbalLogic', label:'📝 Logica Verbale', color:'#ffd700'},
-      {key:'sequences', label:'🔢 Sequenze', color:'#ff6b6b'},
+      {key:'reasoning', label:'\ud83e\udde9 Ragionamento', color:'#6c63ff'},
+      {key:'spatial', label:'\ud83d\udd04 Spazio', color:'#00d4aa'},
+      {key:'verbalLogic', label:'\ud83d\udcdd Logica Verbale', color:'#ffd700'},
+      {key:'sequences', label:'\ud83d\udd22 Sequenze', color:'#ff6b6b'},
+      {key:'italiano', label:'\ud83d\udcd6 Italiano', color:'#ff9f43'},
+      {key:'matematica', label:'\ud83d\udd22 Matematica', color:'#54a0ff'},
     ];
     const totalEx = areas.reduce((s,a) => s + (areaStats[a.key]?.total||0), 0);
-    
-    // Find weakest area
     let weakest=null, lowestPct=101;
     areas.forEach(a => {
       const st = areaStats[a.key];
       if(st && st.total>0) { const pct=Math.round((st.correct/st.total)*100); if(pct<lowestPct){lowestPct=pct;weakest=a;} }
     });
-    
     let barsHtml = '';
     areas.forEach(a => {
-      const st = areaStats[a.key];
-      const total = st?.total||0;
-      const correct = st?.correct||0;
+      const st = areaStats[a.key]; const total = st?.total||0; const correct = st?.correct||0;
       const pct = total>0 ? Math.round((correct/total)*100) : 0;
       barsHtml += `<div style="margin-bottom:14px;text-align:left">
         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
           <span style="color:var(--text-primary)">${a.label}</span>
-          <span style="color:var(--text-secondary)">${total>0 ? `${pct}% (${correct}/${total})` : '—'}</span>
+          <span style="color:var(--text-secondary)">${total>0 ? `${pct}% (${correct}/${total})` : '\u2014'}</span>
         </div>
         <div class="stats-bar-bg"><div class="stats-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${a.color},${a.color}cc)"></div></div>
       </div>`;
     });
-    
     let encouragement = '';
     if(weakest && lowestPct < 80) {
-      const msg = lowestPct < 50 
-        ? "Non mollare! Ogni missione ti fa migliorare 🚀" 
-        : "Sei sulla buona strada! Continua ad allenarti 💪";
+      const msg = lowestPct < 50 ? "Non mollare! Ogni missione ti fa migliorare \ud83d\ude80" : "Sei sulla buona strada! Continua \ud83d\udcaa";
       encouragement = `<div style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;text-align:left">
-        <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px">💡 Suggerimento</div>
-        <div style="font-size:13px;color:var(--text-secondary)">La tua area più debole è <strong style="color:${weakest.color}">${weakest.label}</strong> (${lowestPct}%). ${msg}</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px">\ud83d\udca1 Suggerimento</div>
+        <div style="font-size:13px;color:var(--text-secondary)">La tua area pi\u00f9 debole \u00e8 <strong style="color:${weakest.color}">${weakest.label}</strong> (${lowestPct}%). ${msg}</div>
       </div>`;
     } else if(totalEx > 0 && lowestPct >= 80) {
       encouragement = `<div style="background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.3);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
-        <div style="font-size:14px;color:var(--accent-secondary);font-weight:600">🌟 Fantastico! Sei forte in tutte le aree!</div>
+        <div style="font-size:14px;color:var(--accent-secondary);font-weight:600">\ud83c\udf1f Fantastico! Sei forte in tutte le aree!</div>
       </div>`;
     }
-    
     html += `<div class="card" style="text-align:center">
-      <div style="font-size:40px;margin-bottom:8px">📊</div>
+      <div style="font-size:40px;margin-bottom:8px">\ud83d\udcca</div>
       <h2 style="font-size:20px;color:var(--accent-primary);margin-bottom:4px">Statistiche</h2>
-      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">${totalEx>0 ? `Hai completato ${totalEx} esercizi in totale!` : 'Completa qualche missione per vedere le statistiche!'}</p>
-      ${barsHtml}
-      ${encouragement}
-      <button class="btn-primary" onclick="goHome()">⬅️ Torna alla Base</button>
+      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">${totalEx>0 ? `Hai completato ${totalEx} esercizi in totale!` : 'Completa qualche missione!'}</p>
+      ${barsHtml}${encouragement}
+      <button class="btn-primary" onclick="goHome()">\u2b05\ufe0f Torna alla Base</button>
     </div>`;
   } else if (screen === 'completed') {
     html += `<div class="card" style="text-align:center">
-      <div style="font-size:64px;margin-bottom:16px">✅</div>
+      <div style="font-size:64px;margin-bottom:16px">\u2705</div>
       <h2 style="font-size:18px;color:var(--accent-secondary);margin-bottom:12px">Missione completata!</h2>
-      <p style="color:var(--text-secondary);margin-bottom:20px">Hai già completato la missione di oggi.<br>Torna domani per una nuova sfida!</p>
+      <p style="color:var(--text-secondary);margin-bottom:20px">Hai gi\u00e0 completato la missione di oggi.<br>Torna domani per una nuova sfida!</p>
       <div style="background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.3);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
-        <div style="font-size:24px;font-weight:700;color:var(--accent-secondary)">🔥 ${state.streak} giorni di fila</div>
+        <div style="font-size:24px;font-weight:700;color:var(--accent-secondary)">\ud83d\udd25 ${state.streak} giorni di fila</div>
       </div>
-      <button class="btn-stats" onclick="showStats()">📊 Statistiche</button>
+      <button class="btn-stats" onclick="showStats()">\ud83d\udcca Statistiche</button>
     </div>`;
   } else if (screen === 'playing') {
     const ex = exercises[currentEx].gen(exercises[currentEx].seed, state.daysPlayed);
-    const typeLabels = {reasoning:'🧩 Ragionamento',spatial:'🔄 Spazio',verbalLogic:'📝 Logica',sequences:'🔢 Sequenze'};
-    const narrative = NARRATIVES[ex.type][Math.floor(Math.random()*3)];
+    const typeLabels = {reasoning:'\ud83e\udde9 Ragionamento',spatial:'\ud83d\udd04 Spazio',verbalLogic:'\ud83d\udcdd Logica',sequences:'\ud83d\udd22 Sequenze',italiano:'\ud83d\udcd6 Italiano',matematica:'\ud83d\udd22 Matematica'};
+    const narrative = NARRATIVES[ex.type]?NARRATIVES[ex.type][Math.floor(Math.random()*3)]:'';
     
     html += `<div style="width:100%;margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:4px">
-        <span>${typeLabels[ex.type]}</span><span>${currentEx+1}/${exercises.length}</span>
+        <span>${typeLabels[ex.type]||''}</span><span>${currentEx+1}/${exercises.length}</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:${((currentEx+1)/exercises.length)*100}%"></div></div>
     </div>`;
-    html += `<div class="narrative">💬 ${narrative}</div>`;
+    if(narrative) html += `<div class="narrative">\ud83d\udcac ${narrative}</div>`;
     html += `<div class="card">`;
     
     if (ex.type === 'reasoning') {
@@ -509,9 +719,25 @@ function render() {
       html += `<div class="sequence-display">`;
       ex.sequence.forEach((item,i) => {
         html += `<span class="seq-item">${item}</span>`;
-        if(i<ex.sequence.length-1) html += `<span style="color:var(--text-muted)">→</span>`;
+        if(i<ex.sequence.length-1) html += `<span style="color:var(--text-muted)">\u2192</span>`;
       });
-      html += `<span style="color:var(--text-muted)">→</span><span class="seq-item seq-missing">?</span></div>`;
+      html += `<span style="color:var(--text-muted)">\u2192</span><span class="seq-item seq-missing">?</span></div>`;
+      html += `<div class="options-grid">`;
+      ex.options.forEach((opt,i) => {
+        html += `<div class="option-btn" onclick="selectAnswer(${i},'${encodeURIComponent(opt)}','${encodeURIComponent(ex.answer)}')">${opt}</div>`;
+      });
+      html += `</div>`;
+    } else if (ex.type === 'italiano') {
+      html += `<p style="font-size:15px;color:var(--text-primary);margin-bottom:8px;font-weight:600;text-align:center">${ex.question}</p>`;
+      html += `<p style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;text-align:center">${ex.instruction}</p>`;
+      html += `<div class="options-grid" style="grid-template-columns:1fr">`;
+      ex.options.forEach((opt,i) => {
+        html += `<div class="option-btn" onclick="selectAnswer(${i},'${encodeURIComponent(opt)}','${encodeURIComponent(ex.answer)}')">${opt}</div>`;
+      });
+      html += `</div>`;
+    } else if (ex.type === 'matematica') {
+      html += `<p style="font-size:15px;color:var(--text-primary);margin-bottom:8px;font-weight:600;text-align:center">${ex.question}</p>`;
+      if(ex.instruction) html += `<div style="text-align:center;margin-bottom:8px"><span style="font-size:18px;color:var(--accent-primary);font-weight:700;background:rgba(108,99,255,0.08);border-radius:8px;padding:10px 16px;display:inline-block">${ex.instruction}</span></div>`;
       html += `<div class="options-grid">`;
       ex.options.forEach((opt,i) => {
         html += `<div class="option-btn" onclick="selectAnswer(${i},'${encodeURIComponent(opt)}','${encodeURIComponent(ex.answer)}')">${opt}</div>`;
@@ -525,7 +751,7 @@ function render() {
     const correct = results.filter(r=>r.correct).length;
     const total = results.length;
     const pct = Math.round((correct/total)*100);
-    const grade = pct>=90 ? {e:'🏆',t:'Eccezionale!',c:'var(--accent-gold)'} : pct>=70 ? {e:'⭐',t:'Ottimo!',c:'var(--accent-secondary)'} : pct>=50 ? {e:'👍',t:'Buon inizio!',c:'var(--accent-primary)'} : {e:'💪',t:'Continua così!',c:'var(--text-secondary)'};
+    const grade = pct>=90 ? {e:'\ud83c\udfc6',t:'Eccezionale!',c:'var(--accent-gold)'} : pct>=70 ? {e:'\u2b50',t:'Ottimo!',c:'var(--accent-secondary)'} : pct>=50 ? {e:'\ud83d\udc4d',t:'Buon inizio!',c:'var(--accent-primary)'} : {e:'\ud83d\udcaa',t:'Continua cos\u00ec!',c:'var(--text-secondary)'};
     const xp = correct*10 + (correct===total?20:0) + Math.min(state.streak*5,50);
     
     html += `<div class="card" style="text-align:center">
@@ -537,12 +763,12 @@ function render() {
           <span style="color:var(--text-secondary)">Risposte corrette</span>
           <span style="color:var(--accent-secondary);font-weight:700">+${correct*10} XP</span>
         </div>
-        ${correct===total?`<div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px"><span style="color:var(--text-secondary)">Bonus perfezione! 🎯</span><span style="color:var(--accent-gold);font-weight:700">+20 XP</span></div>`:''}
-        ${state.streak>0?`<div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px"><span style="color:var(--text-secondary)">Bonus streak 🔥</span><span style="color:var(--accent-gold);font-weight:700">+${Math.min(state.streak*5,50)} XP</span></div>`:''}
+        ${correct===total?`<div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px"><span style="color:var(--text-secondary)">Bonus perfezione! \ud83c\udfaf</span><span style="color:var(--accent-gold);font-weight:700">+20 XP</span></div>`:''}
+        ${state.streak>0?`<div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px"><span style="color:var(--text-secondary)">Bonus streak \ud83d\udd25</span><span style="color:var(--accent-gold);font-weight:700">+${Math.min(state.streak*5,50)} XP</span></div>`:''}
         <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
         <div style="display:flex;justify-content:space-between;font-size:16px"><span style="font-weight:700">Totale</span><span style="color:var(--accent-gold);font-weight:700">+${xp} XP</span></div>
       </div>
-      <button class="btn-primary" onclick="finishMission(${xp})">🏠 Torna alla Base</button>
+      <button class="btn-primary" onclick="finishMission(${xp})">\ud83c\udfe0 Torna alla Base</button>
     </div>`;
   }
   
@@ -561,10 +787,9 @@ window.selectAnswer = function(idx, selected, correct) {
   const sel = decodeURIComponent(selected);
   const cor = decodeURIComponent(correct);
   const isCorrect = sel === cor;
-  const exType = exercises[currentEx].gen === genReasoning ? 'reasoning' : exercises[currentEx].gen === genSpatial ? 'spatial' : exercises[currentEx].gen === genSequence ? 'sequences' : 'verbalLogic';
+  const exType = exercises[currentEx].gen === genReasoning ? 'reasoning' : exercises[currentEx].gen === genSpatial ? 'spatial' : exercises[currentEx].gen === genSequence ? 'sequences' : exercises[currentEx].gen === genItaliano ? 'italiano' : exercises[currentEx].gen === genMatematica ? 'matematica' : 'verbalLogic';
   results.push({correct: isCorrect, type: exType});
   
-  // Show feedback
   const btns = document.querySelectorAll('.option-btn');
   btns.forEach((btn,i) => {
     btn.style.pointerEvents = 'none';
@@ -572,8 +797,8 @@ window.selectAnswer = function(idx, selected, correct) {
     else if (i === idx && !isCorrect) btn.classList.add('wrong');
   });
   document.getElementById('feedback').innerHTML = isCorrect 
-    ? '<span style="color:var(--accent-secondary)">✅ Corretto! +10 XP</span>'
-    : '<span style="color:var(--accent-warning)">❌ Non esatto</span>';
+    ? '<span style="color:var(--accent-secondary)">\u2705 Corretto! +10 XP</span>'
+    : '<span style="color:var(--accent-warning)">\u274c Non esatto</span>';
   
   setTimeout(() => { currentEx++; if(currentEx>=exercises.length) screen='results'; render(); }, 1200);
 };
@@ -594,15 +819,14 @@ window.selectVerbal = function(idx, opt) {
   if (window._vlSelected.length === window._vlNumToSelect) {
     const isCorrect = window._vlSelected.every(s => window._vlCorrect.includes(s));
     results.push({correct: isCorrect, type: 'verbalLogic'});
-    // Highlight
     document.querySelectorAll('.option-btn').forEach((btn,i) => {
       btn.style.pointerEvents = 'none';
       if (window._vlCorrect.includes(btn.textContent)) btn.classList.add('correct');
       else if (window._vlSelected.includes(btn.textContent) && !window._vlCorrect.includes(btn.textContent)) btn.classList.add('wrong');
     });
     document.getElementById('feedback').innerHTML = isCorrect 
-      ? '<span style="color:var(--accent-secondary)">✅ Corretto! +10 XP</span>'
-      : '<span style="color:var(--accent-warning)">❌ Non esatto</span>';
+      ? '<span style="color:var(--accent-secondary)">\u2705 Corretto! +10 XP</span>'
+      : '<span style="color:var(--accent-warning)">\u274c Non esatto</span>';
     setTimeout(() => { currentEx++; if(currentEx>=exercises.length) screen='results'; render(); }, 1500);
   }
 };
@@ -615,12 +839,10 @@ window.finishMission = function(xp) {
   state.streak = (state.lastPlayedDay === today-1 || state.streak > 0) ? state.streak+1 : 1;
   saveState(state);
   
-  // Update per-area stats
   results.forEach(r => {
-    if(areaStats[r.type]) {
-      areaStats[r.type].total++;
-      if(r.correct) areaStats[r.type].correct++;
-    }
+    if(!areaStats[r.type]) areaStats[r.type] = {correct:0,total:0};
+    areaStats[r.type].total++;
+    if(r.correct) areaStats[r.type].correct++;
   });
   saveStats(areaStats);
   
@@ -629,9 +851,6 @@ window.finishMission = function(xp) {
 };
 
 render();
-
-// Service Worker: active only when deployed
-
 </script>
 </body>
 </html>

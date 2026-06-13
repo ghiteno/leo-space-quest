@@ -8,6 +8,8 @@ import { generateReasoningExercise } from './exercises/reasoning.js';
 import { generateSpatialExercise } from './exercises/spatial.js';
 import { generateVerbalLogicExercise } from './exercises/verbalLogic.js';
 import { generateSequenceExercise } from './exercises/sequences.js';
+import { generateItalianoExercise } from './exercises/italiano.js';
+import { generateMatematicaExercise } from './exercises/matematica.js';
 
 // Stars background
 function Stars() {
@@ -196,6 +198,10 @@ function ExerciseView({ exercise, difficulty, onAnswer, questionNumber, totalQue
         return generateVerbalLogicExercise(exercise.seed, difficulty);
       case 'sequences':
         return generateSequenceExercise(exercise.seed, difficulty);
+      case 'italiano':
+        return generateItalianoExercise(exercise.seed, difficulty);
+      case 'matematica':
+        return generateMatematicaExercise(exercise.seed, difficulty);
       default:
         return null;
     }
@@ -223,7 +229,7 @@ function ExerciseView({ exercise, difficulty, onAnswer, questionNumber, totalQue
     } else {
       // Single select for other types
       setSelectedAnswers([option]);
-      const isCorrect = option === (exerciseData.answer || exerciseData.answer);
+      const isCorrect = option === exerciseData.answer;
       setFeedback(isCorrect ? 'correct' : 'wrong');
       setRevealed(true);
       setTimeout(() => onAnswer(isCorrect), 1200);
@@ -236,6 +242,8 @@ function ExerciseView({ exercise, difficulty, onAnswer, questionNumber, totalQue
       case 'spatial': return '🔄 Spazio';
       case 'verbalLogic': return '📝 Logica Verbale';
       case 'sequences': return '🔢 Sequenze';
+      case 'italiano': return '📖 Italiano';
+      case 'matematica': return '🔢 Matematica';
       default: return '❓';
     }
   };
@@ -272,6 +280,8 @@ function ExerciseView({ exercise, difficulty, onAnswer, questionNumber, totalQue
         {exercise.type === 'spatial' && <SpatialDisplay data={exerciseData} />}
         {exercise.type === 'verbalLogic' && <VerbalLogicDisplay data={exerciseData} />}
         {exercise.type === 'sequences' && <SequenceDisplay data={exerciseData} />}
+        {exercise.type === 'italiano' && <ItalianoDisplay data={exerciseData} />}
+        {exercise.type === 'matematica' && <MatematicaDisplay data={exerciseData} />}
         
         {/* Options */}
         <div className="options-grid" style={
@@ -422,6 +432,38 @@ function SequenceDisplay({ data }) {
   );
 }
 
+function ItalianoDisplay({ data }) {
+  return (
+    <div>
+      <p style={{ fontSize: 15, color: 'var(--text-primary)', marginBottom: 8, fontWeight: 600, textAlign: 'center' }}>
+        {data.question}
+      </p>
+      <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4, textAlign: 'center' }}>
+        {data.instruction}
+      </p>
+    </div>
+  );
+}
+
+function MatematicaDisplay({ data }) {
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <p style={{ fontSize: 15, color: 'var(--text-primary)', marginBottom: 8, fontWeight: 600 }}>
+        {data.question}
+      </p>
+      {data.instruction && (
+        <p style={{ 
+          fontSize: 18, color: 'var(--accent-primary)', marginBottom: 4, fontWeight: 700,
+          background: 'rgba(108, 99, 255, 0.08)', borderRadius: 8, padding: '10px 16px',
+          display: 'inline-block',
+        }}>
+          {data.instruction}
+        </p>
+      )}
+    </div>
+  );
+}
+
 // Results screen
 function ResultsScreen({ results, state, onFinish }) {
   const correct = results.filter(r => r).length;
@@ -493,9 +535,11 @@ function StatsScreen({ state, onBack }) {
     { key: 'spatial', label: '🔄 Spazio', color: '#00d4aa' },
     { key: 'verbalLogic', label: '📝 Logica Verbale', color: '#ffd700' },
     { key: 'sequences', label: '🔢 Sequenze', color: '#ff6b6b' },
+    { key: 'italiano', label: '📖 Italiano', color: '#ff9f43' },
+    { key: 'matematica', label: '🔢 Matematica', color: '#54a0ff' },
   ];
   
-  const stats = state.stats || { reasoning:{correct:0,total:0}, spatial:{correct:0,total:0}, verbalLogic:{correct:0,total:0}, sequences:{correct:0,total:0} };
+  const stats = state.stats || { reasoning:{correct:0,total:0}, spatial:{correct:0,total:0}, verbalLogic:{correct:0,total:0}, sequences:{correct:0,total:0}, italiano:{correct:0,total:0}, matematica:{correct:0,total:0} };
   
   // Find weakest area
   let weakest = null;
