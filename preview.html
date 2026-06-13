@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0e27">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Space Quest">
+<title>Leo's Space Quest 🚀</title>
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNwYWNlIFF1ZXN0IC0gTWlzc2lvbmkgQ29nbml0aXZlIiwKICAic2hvcnRfbmFtZSI6ICJTcGFjZSBRdWVzdCIsCiAgImRlc2NyaXB0aW9uIjogIk1pc3Npb25pIGNvZ25pdGl2ZSBnaW9ybmFsaWVyZSBuZWxsbyBzcGF6aW8hIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgInRoZW1lX2NvbG9yIjogIiMwYTBlMjciLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwYTBlMjciLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDUxMiA1MTInJTNFJTNDcmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgcng9JzY0JyBmaWxsPSclMjMwYTBlMjcnLyUzRSUzQ3RleHQgeD0nMjU2JyB5PSczNDAnIGZvbnQtc2l6ZT0nMjgwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyUzRfCfmoAlM0MvdGV4dCUzRSUzQy9zdmclM0UiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFza2FibGUiCiAgICB9CiAgXQp9">
+<style>
+:root {
+  --bg-deep: #0a0e27;
+  --bg-card: #141937;
+  --bg-card-hover: #1c2347;
+  --accent-primary: #6c63ff;
+  --accent-secondary: #00d4aa;
+  --accent-warning: #ff6b6b;
+  --accent-gold: #ffd700;
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+  --text-muted: #636e7f;
+  --border: #2d3748;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+body::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(108,99,255,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0,212,170,0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+#app {
+  position: relative; z-index: 1;
+  max-width: 500px; margin: 0 auto; padding: 16px;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+}
+.card {
+  background: var(--bg-card); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 24px; width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: slideUp 0.4s ease-out;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-primary), #8b5cf6);
+  color: white; padding: 14px 28px; border-radius: var(--radius-sm);
+  font-size: 16px; font-weight: 600; border: none; cursor: pointer; width: 100%;
+  box-shadow: 0 4px 16px rgba(108,99,255,0.4);
+}
+.btn-primary:active { transform: scale(0.95); }
+.btn-stats {
+  background: linear-gradient(135deg, #00d4aa, #00b894);
+  color: white; padding: 12px 28px; border-radius: var(--radius-sm);
+  font-size: 15px; font-weight: 600; border: none; cursor: pointer; width: 100%;
+  box-shadow: 0 4px 16px rgba(0,212,170,0.3); margin-top: 12px;
+}
+.btn-stats:active { transform: scale(0.95); }
+.progress-bar { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 8px 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); border-radius: 4px; transition: width 0.5s ease; }
+.xp-bar { width: 100%; height: 12px; background: var(--border); border-radius: 6px; overflow: hidden; }
+.xp-fill { height: 100%; background: linear-gradient(90deg, var(--accent-gold), #ffaa00); border-radius: 6px; transition: width 0.8s ease; }
+.options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
+.option-btn {
+  background: var(--bg-card-hover); border: 2px solid var(--border); border-radius: var(--radius-sm);
+  padding: 16px; color: var(--text-primary); font-size: 15px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; min-height: 60px;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.option-btn:hover { border-color: var(--accent-primary); background: rgba(108,99,255,0.1); }
+.option-btn.correct { border-color: var(--accent-secondary); background: rgba(0,212,170,0.15); box-shadow: 0 0 20px rgba(0,212,170,0.3); }
+.option-btn.wrong { border-color: var(--accent-warning); background: rgba(255,107,107,0.15); animation: shake 0.4s ease-out; }
+.matrix-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px auto; max-width: 260px; }
+.matrix-cell {
+  aspect-ratio: 1; background: var(--bg-card-hover); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--border); font-size: 22px;
+}
+.matrix-cell.empty { border-color: var(--accent-primary); border-style: dashed; }
+.sequence-display { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+.seq-item { background: var(--bg-card-hover); border-radius: 8px; padding: 8px 14px; font-size: 18px; font-weight: 700; border: 1px solid var(--border); }
+.seq-missing { border: 2px dashed var(--accent-primary); color: var(--accent-primary); background: transparent; }
+.stat-box { background: var(--bg-card-hover); border-radius: var(--radius-sm); padding: 10px; text-align: center; }
+.header { width: 100%; margin-bottom: 16px; }
+.narrative { background: rgba(108,99,255,0.08); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.stars { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 0; }
+.star { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; animation: twinkle 3s ease-in-out infinite; }
+@keyframes twinkle { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+.stats-bar-bg { width: 100%; height: 12px; background: var(--border); border-radius: 6px; overflow: hidden; }
+.stats-bar-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; }
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div id="app"></div>
+<script>
+// === SAFE STORAGE (works even when localStorage is blocked) ===
+let _memStore = {};
+const safeStorage = {
+  getItem(key) { try { return safeStorage.getItem(key); } catch(e) { return _memStore[key] || null; } },
+  setItem(key, val) { try { safeStorage.setItem(key, val); } catch(e) { _memStore[key] = val; } }
+};
+
+// === GAME ENGINE ===
+const STORAGE_KEY = 'leo-space-quest-v1';
+const STATS_KEY = 'leo-space-quest-stats-v1';
+const SHAPES = ['●','■','▲','◆','★','⬟','⬢','◯','□','△'];
+const GEO_SHAPES = [
+  { symbols: ['◢','◣','◤','◥'], name: 'triangle' },
+  { symbols: ['▲','▶','▼','◀'], name: 'arrow' },
+  { symbols: ['┘','└','┐','┌'], name: 'L-shape' },
+  { symbols: ['┴','├','┬','┤'], name: 'T-shape' },
+];
+const OBJECTS = [
+  { object:'🚀 Razzo', essential:['motore','carburante','scudo termico','cabina'], related:['astronauta','rampa','tuta','antenna'], unrelated:['ruote','binari','ancora','pedali'] },
+  { object:'📚 Libro', essential:['pagine','copertina','testo','titolo'], related:['scaffale','biblioteca','segnalibro','autore'], unrelated:['motore','ruote','finestre','radici'] },
+  { object:'🏠 Casa', essential:['muri','tetto','fondamenta','porta'], related:['giardino','garage','cancello','balcone'], unrelated:['ali','pinne','radici','motore'] },
+  { object:'🌳 Albero', essential:['radici','tronco','rami','foglie'], related:['frutti','fiori','ombra','nido'], unrelated:['ruote','finestre','motore','timone'] },
+  { object:'🚗 Auto', essential:['motore','ruote','volante','freni'], related:['fari','specchietti','radio','tergicristalli'], unrelated:['ali','vele','rami','pagine'] },
+  { object:'⛵ Barca a vela', essential:['scafo','vela','albero','timone'], related:['ancora','bussola','salvagente','oblò'], unrelated:['ruote','pedali','binari','foglie'] },
+  { object:'🎸 Chitarra', essential:['corde','manico','cassa armonica','tastiera'], related:['plettro','custodia','amplificatore','accordatore'], unrelated:['ruote','ali','radici','motore'] },
+  { object:'🖥️ Computer', essential:['processore','memoria','schermo','tastiera'], related:['mouse','casse','webcam','stampante'], unrelated:['vele','radici','pedali','timone'] },
+  { object:'🌍 Pianeta', essential:['atmosfera','crosta','nucleo','acqua'], related:['luna','montagne','oceani','vulcani'], unrelated:['motore','ruote','pagine','corde'] },
+  { object:'✈️ Aereo', essential:['ali','motori','fusoliera','coda'], related:['pilota','pista','carrello','finestrini'], unrelated:['radici','vele','pedali','rami'] },
+  { object:'⚽ Calcio', essential:['pallone','giocatori','campo','porte'], related:['arbitro','tifosi','panchina','tabellone'], unrelated:['vele','radici','pagine','motore'] },
+  { object:'🎂 Torta', essential:['farina','uova','zucchero','cottura'], related:['candeline','crema','decorazioni','piatto'], unrelated:['motore','radici','ali','timone'] },
+  // NEW objects covering diverse topics
+  { object:'🌋 Vulcano', essential:['magma','cratere','lava','camino vulcanico'], related:['cenere','terremoti','isola','fumarole'], unrelated:['ruote','pagine','corde','tastiera'] },
+  { object:'🦋 Farfalla', essential:['ali','antenne','proboscide','addome'], related:['fiori','bozzolo','bruco','polline'], unrelated:['ruote','motore','timone','binari'] },
+  { object:'📱 Smartphone', essential:['schermo touch','batteria','processore','antenna'], related:['custodia','caricatore','auricolari','app'], unrelated:['vele','radici','rami','pedali'] },
+  { object:'🤖 Robot', essential:['sensori','attuatori','processore','energia'], related:['braccio meccanico','cavi','programmazione','ruote'], unrelated:['foglie','criniera','vele','pagine'] },
+  { object:'🏀 Pallacanestro', essential:['pallone','canestro','campo','giocatori'], related:['tabellone','arbitro','divisa','cronometro'], unrelated:['vele','radici','motore','timone'] },
+  { object:'🏊 Nuoto', essential:['acqua','piscina','costume','corsie'], related:['occhialini','cuffia','trampolino','cronometro'], unrelated:['ruote','binari','foglie','corde'] },
+  { object:'🎨 Quadro', essential:['tela','colori','pennello','cornice'], related:['cavalletto','museo','artista','vernice'], unrelated:['motore','radici','timone','binari'] },
+  { object:'🎭 Teatro', essential:['palcoscenico','attori','copione','pubblico'], related:['costumi','luci','sipario','regista'], unrelated:['ruote','radici','motore','vele'] },
+  { object:'🔬 Microscopio', essential:['lenti','oculare','obiettivo','piattaforma'], related:['vetrino','laboratorio','colorante','campione'], unrelated:['ruote','vele','criniera','pagine'] },
+  { object:'⚡ Circuito elettrico', essential:['batteria','fili conduttori','interruttore','lampadina'], related:['resistenza','voltmetro','saldatore','presa'], unrelated:['foglie','vele','radici','rami'] },
+  { object:'❤️ Cuore', essential:['ventricoli','atri','valvole','arterie'], related:['sangue','battito','petto','vene'], unrelated:['ruote','pagine','motore','binari'] },
+  { object:'🧠 Cervello', essential:['neuroni','emisferi','corteccia','sinapsi'], related:['cranio','pensiero','memoria','sogni'], unrelated:['ruote','vele','radici','motore'] },
+  { object:'🏔️ Montagna', essential:['vetta','versanti','roccia','altitudine'], related:['neve','sentieri','rifugio','animali'], unrelated:['motore','pagine','corde','tastiera'] },
+  { object:'🏝️ Isola', essential:['terra','acqua circostante','costa','superficie'], related:['spiaggia','palme','porto','faro'], unrelated:['binari','motore','tastiera','pedali'] },
+];
+const PLANETS = ['Mercury','Venus','Mars','Jupiter','Saturn','Neptune','Pluto'];
+const PLANET_EMOJI = ['☿️','♀️','♂️','♃','♄','♆','⯓'];
+const PLANET_LEVELS = [1,3,5,8,12,16,20];
+const NARRATIVES = {
+  reasoning: ['Il computer di bordo ha un glitch! Trova il pattern.','Un segnale alieno contiene un codice. Decifra!','Lo scudo ha perso un pezzo. Quale manca?'],
+  spatial: ['Aggancia il modulo spaziale — trova l\'orientamento giusto!','Un asteroide ruota. Da che lato lo vedi?','La mappa stellare è inclinata. Posizione corretta!'],
+  verbalLogic: ['Cosa serve per questa missione?','Il manuale è danneggiato. Quali parti essenziali?','Prepara l\'equipaggiamento. Cosa è indispensabile?'],
+  sequences: ['Il radar rileva un pattern. Prossimo segnale?','La rotta segue una logica. Dove vai?','I cristalli energetici. Quale viene dopo?'],
+};
+
+function seededRng(seed) { let s = seed; return () => { s=(s*1664525+1013904223)&0xFFFFFFFF; return (s>>>0)/0xFFFFFFFF; }; }
+function shuffle(arr, rng) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function getDayNum() { return Math.floor(Date.now()/(1000*60*60*24)); }
+function getLevel(xp) { let l=1,t=100,r=xp; while(r>=t){r-=t;l++;t=Math.floor(t*1.3);} return {level:l,inLevel:r,forNext:t}; }
+function getPlanet(level) { let p=0; for(let i=0;i<PLANET_LEVELS.length;i++) if(level>=PLANET_LEVELS[i]) p=i; return {name:PLANETS[p],emoji:PLANET_EMOJI[p]}; }
+
+// Safe storage wrapper (handles iframe sandbox)
+let _memoryStore = {};
+function safeGet(key) { try { return safeStorage.getItem(key); } catch(e) { return _memoryStore[key]||null; } }
+function safeSet(key, val) { try { safeStorage.setItem(key, val); } catch(e) { _memoryStore[key]=val; } }
+
+function loadState() {
+  try { const s=safeGet(STORAGE_KEY); if(s) return JSON.parse(s); } catch(e){}
+  return { level:1, totalXP:0, dayNum:getDayNum(), daysPlayed:0, streak:0, lastPlayedDay:0, completedToday:false };
+}
+function saveState(s) { try { safeSet(STORAGE_KEY, JSON.stringify(s)); } catch(e){} }
+
+// Stats per area
+function loadStats() {
+  try { const s=safeGet(STATS_KEY); if(s) return JSON.parse(s); } catch(e){}
+  return { reasoning:{correct:0,total:0}, spatial:{correct:0,total:0}, verbalLogic:{correct:0,total:0}, sequences:{correct:0,total:0} };
+}
+function saveStats(s) { try { safeSet(STATS_KEY, JSON.stringify(s)); } catch(e){} }
+
+// === EXERCISE GENERATORS ===
+function genReasoning(seed, day) {
+  const rng = seededRng(seed);
+  const patterns = [
+    () => { // Row same
+      const pool = shuffle(SHAPES.slice(0,6),rng);
+      const grid = [[pool[0],pool[1],pool[2]],[pool[1],pool[2],pool[0]],[pool[2],pool[0],'?']];
+      const answer = pool[1];
+      const opts = shuffle([answer,...shuffle(SHAPES.slice(0,6),rng).filter(s=>s!==answer).slice(0,3)],rng);
+      return {grid,answer,options:opts};
+    },
+    () => { // Count
+      const s = SHAPES[Math.floor(rng()*5)];
+      const grid = [[s,s+s,s.repeat(3)],[s,s+s,s.repeat(3)],[s,s+s,'?']];
+      const answer = s.repeat(3);
+      const opts = shuffle([s,s+s,answer,s.repeat(4)],rng);
+      return {grid,answer,options:opts};
+    },
+    () => { // Diagonal
+      const s1=SHAPES[Math.floor(rng()*3)], s2=SHAPES[Math.floor(rng()*3+3)];
+      const grid = [[s1,s2,s2],[s2,s1,s2],[s2,s2,'?']];
+      const answer = s1;
+      const opts = shuffle([answer,...shuffle(SHAPES,rng).filter(s=>s!==answer).slice(0,3)],rng);
+      return {grid,answer,options:opts};
+    },
+    () => { // Number grid
+      const start=Math.floor(rng()*3)+1, step=Math.floor(rng()*3)+2;
+      const nums=[]; for(let i=0;i<9;i++) nums.push(start+i*step);
+      const grid = [nums.slice(0,3).map(String),nums.slice(3,6).map(String),[String(nums[6]),String(nums[7]),'?']];
+      const answer = String(nums[8]);
+      const opts = shuffle([answer,String(nums[8]+step),String(nums[8]-step),String(nums[8]+1)],rng);
+      return {grid,answer,options:opts};
+    },
+    // NEW: Row sum pattern
+    () => {
+      const total = Math.floor(rng()*5)+9;
+      const r1a=Math.floor(rng()*3)+1, r1b=Math.floor(rng()*3)+2, r1c=total-r1a-r1b;
+      const r2a=Math.floor(rng()*3)+2, r2b=Math.floor(rng()*3)+1, r2c=total-r2a-r2b;
+      const r3a=Math.floor(rng()*3)+1, r3b=Math.floor(rng()*4)+1, r3c=total-r3a-r3b;
+      const grid = [[String(r1a),String(r1b),String(r1c)],[String(r2a),String(r2b),String(r2c)],[String(r3a),String(r3b),'?']];
+      const answer = String(r3c);
+      let opts = [answer];
+      while(opts.length<4){const d=String(r3c+Math.floor(rng()*5)-2);if(!opts.includes(d)&&parseInt(d)>0) opts.push(d);}
+      return {grid,answer,options:shuffle(opts,rng)};
+    },
+    // NEW: Subtraction pattern
+    () => {
+      const start=Math.floor(rng()*3)+8, sub1=Math.floor(rng()*2)+1, sub2=Math.floor(rng()*2)+2;
+      const grid = [
+        [String(start),String(start-sub1),String(start-sub1-sub2)],
+        [String(start+1),String(start+1-sub1),String(start+1-sub1-sub2)],
+        [String(start+2),String(start+2-sub1),'?']
+      ];
+      const answer = String(start+2-sub1-sub2);
+      let opts=[answer];
+      while(opts.length<4){const d=String(parseInt(answer)+Math.floor(rng()*5)-2);if(!opts.includes(d)&&parseInt(d)>0) opts.push(d);}
+      return {grid,answer,options:shuffle(opts,rng)};
+    },
+    // NEW: Cyclic shift pattern
+    () => {
+      const pool = shuffle(SHAPES.slice(0,5),rng);
+      const grid = [[pool[0],pool[1],pool[2]],[pool[2],pool[0],pool[1]],[pool[1],pool[2],'?']];
+      const answer = pool[0];
+      const opts = shuffle([answer,...shuffle(SHAPES,rng).filter(s=>s!==answer).slice(0,3)],rng);
+      return {grid,answer,options:opts};
+    },
+  ];
+  const idx = Math.floor(rng() * patterns.length);
+  return { type:'reasoning', ...patterns[idx]() };
+}
+
+function genSpatial(seed, day) {
+  const rng = seededRng(seed);
+  const set = GEO_SHAPES[Math.floor(rng()*GEO_SHAPES.length)];
+  const targetIdx = Math.floor(rng()*4);
+  const target = set.symbols[targetIdx];
+  const answer = target;
+  const opts = shuffle([...set.symbols],rng);
+  return { type:'spatial', target, answer, options:opts, label:'Trova la figura orientata come questa:' };
+}
+
+function genVerbalLogic(seed, day) {
+  const rng = seededRng(seed);
+  const obj = OBJECTS[Math.floor(rng()*OBJECTS.length)];
+  const numCorrect = day < 5 ? 2 : day < 15 ? 3 : 4;
+  const correct = shuffle([...obj.essential],rng).slice(0,numCorrect);
+  const distractors = day < 10
+    ? shuffle([...obj.unrelated],rng).slice(0, 6-numCorrect)
+    : shuffle([...obj.related,...obj.unrelated.slice(0,1)],rng).slice(0, 6-numCorrect);
+  const options = shuffle([...correct,...distractors],rng);
+  return { type:'verbalLogic', object:obj.object, correct, options, numToSelect:numCorrect };
+}
+
+function genSequence(seed, day) {
+  const rng = seededRng(seed);
+  const type = Math.floor(rng()*7); // expanded from 4 to 7 types
+  let seq, answer, hint;
+  if (type === 0) { // arithmetic
+    const start=Math.floor(rng()*5)+1, step=Math.floor(rng()*4)+2;
+    seq=[]; for(let i=0;i<5;i++) seq.push(start+i*step);
+    answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint=`Regola: +${step}`;
+  } else if (type === 1) { // geometric
+    const start=Math.floor(rng()*3)+1, ratio=Math.floor(rng()*2)+2;
+    seq=[start]; for(let i=1;i<5;i++) seq.push(seq[i-1]*ratio);
+    answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint=`Regola: ×${ratio}`;
+  } else if (type === 2) { // fibonacci-like
+    const a=Math.floor(rng()*3)+1, b=Math.floor(rng()*3)+2;
+    seq=[a,b]; for(let i=2;i<6;i++) seq.push(seq[i-1]+seq[i-2]);
+    answer=String(seq[5]); seq=seq.slice(0,5).map(String); hint='Somma dei due precedenti!';
+  } else if (type === 3) { // shape pattern
+    const shapes=['🔴','🔵','🟡','🟢','⭐']; const pool=shuffle(shapes,rng).slice(0,3);
+    const period=Math.floor(rng()*2)+2; seq=[];
+    for(let i=0;i<6;i++) seq.push(pool[i%period]);
+    answer=seq[5]; seq=seq.slice(0,5); hint=`Pattern di ${period} elementi!`;
+  } else if (type === 4) { // NEW: Square numbers
+    const offset=Math.floor(rng()*2);
+    seq=[]; for(let i=0;i<5;i++) seq.push((i+1+offset)*(i+1+offset));
+    answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint='Numeri quadrati! (1×1, 2×2, 3×3...)';
+  } else if (type === 5) { // NEW: Alternating operations (+a, ×2, +a, ×2...)
+    const start=Math.floor(rng()*3)+1, addVal=Math.floor(rng()*3)+1;
+    seq=[start]; for(let i=1;i<6;i++) { seq.push(i%2===1 ? seq[i-1]+addVal : seq[i-1]*2); }
+    answer=String(seq[5]); seq=seq.slice(0,5).map(String); hint=`Operazioni alternate: +${addVal} e ×2!`;
+  } else { // NEW: Triangular numbers
+    const offset=Math.floor(rng()*2);
+    seq=[]; for(let i=0;i<5;i++){ const n=i+1+offset; seq.push((n*(n+1))/2); }
+    answer=String(seq[4]); seq=seq.slice(0,4).map(String); hint='Numeri triangolari! Il passo cresce di 1.';
+  }
+  // Options
+  const rng2=seededRng(seed+99);
+  let opts=[answer];
+  if(typeof answer==='string' && !isNaN(answer)) {
+    const n=parseInt(answer);
+    [n+1,n-1,n+2,n*2,n-2,n+3].forEach(v=>{if(!opts.includes(String(v))&&v>0) opts.push(String(v));});
+  } else {
+    const shapes=['🔴','🔵','🟡','🟢','⭐','💎'];
+    shapes.forEach(s=>{if(!opts.includes(s)&&opts.length<4) opts.push(s);});
+  }
+  opts=shuffle(opts.slice(0,4),rng2);
+  return { type:'sequences', sequence:seq, answer, options:opts, hint };
+}
+
+// === RENDER ===
+const app = document.getElementById('app');
+let state = loadState();
+let areaStats = loadStats();
+let exercises = [];
+let currentEx = 0;
+let results = [];
+let screen = 'welcome';
+
+// Check day
+const today = getDayNum();
+if (state.dayNum !== today) {
+  state.dayNum = today;
+  state.completedToday = false;
+  if (state.lastPlayedDay !== today - 1 && state.lastPlayedDay !== today) state.streak = 0;
+  saveState(state);
+}
+if (state.completedToday) screen = 'completed';
+
+function generateExercises() {
+  const rng = seededRng(today * 7919 + state.daysPlayed * 31);
+  exercises = [];
+  for(let i=0;i<3;i++) exercises.push({gen:genReasoning, seed:Math.floor(rng()*99999)});
+  for(let i=0;i<3;i++) exercises.push({gen:genSpatial, seed:Math.floor(rng()*99999)});
+  for(let i=0;i<3;i++) exercises.push({gen:genVerbalLogic, seed:Math.floor(rng()*99999)});
+  for(let i=0;i<3;i++) exercises.push({gen:genSequence, seed:Math.floor(rng()*99999)});
+  exercises = shuffle(exercises, rng);
+}
+
+function render() {
+  const {level,inLevel,forNext} = getLevel(state.totalXP);
+  const planet = getPlanet(level);
+  
+  let html = `<div class="header">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:24px">🚀</span>
+        <div><div style="font-size:14px;color:var(--accent-gold);font-weight:700">Livello ${level}</div>
+        <div style="font-size:11px;color:var(--text-secondary)">Pianeta: ${planet.name} ${planet.emoji}</div></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:14px;color:var(--accent-gold);font-weight:700">${state.totalXP} XP</div>
+        <div style="font-size:11px;color:var(--text-secondary)">🔥 ${state.streak} giorni</div>
+      </div>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" style="width:${(inLevel/forNext)*100}%"></div></div>
+    <div style="font-size:10px;color:var(--text-muted);margin-top:4px;text-align:right">${inLevel}/${forNext} XP</div>
+  </div>`;
+  
+  if (screen === 'welcome') {
+    html += `<div class="card" style="text-align:center">
+      <div style="font-size:64px;margin-bottom:16px">🚀</div>
+      <h1 style="font-size:22px;color:var(--accent-primary);margin-bottom:8px">Space Quest</h1>
+      <p style="color:var(--text-secondary);margin-bottom:24px;font-size:14px">Missione giornaliera su ${planet.name} ${planet.emoji}</p>
+      ${state.streak > 0 ? `<div style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px">
+        <span style="font-size:20px">🔥</span><span style="color:var(--accent-gold);font-weight:600;margin-left:8px">${state.streak} giorni consecutivi!</span>
+      </div>` : ''}
+      <button class="btn-primary" onclick="startMission()">🛸 Inizia la Missione</button>
+      <button class="btn-stats" onclick="showStats()">📊 Statistiche</button>
+      <div style="margin-top:24px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+        <div class="stat-box"><div style="font-size:18px">📋</div><div style="font-size:16px;font-weight:700">${state.daysPlayed}</div><div style="font-size:10px;color:var(--text-muted)">Missioni</div></div>
+        <div class="stat-box"><div style="font-size:18px">⭐</div><div style="font-size:16px;font-weight:700">${level}</div><div style="font-size:10px;color:var(--text-muted)">Livello</div></div>
+        <div class="stat-box"><div style="font-size:18px">💎</div><div style="font-size:16px;font-weight:700">${state.totalXP}</div><div style="font-size:10px;color:var(--text-muted)">XP Totali</div></div>
+        <div class="stat-box"><div style="font-size:18px">🔥</div><div style="font-size:16px;font-weight:700">${state.streak}</div><div style="font-size:10px;color:var(--text-muted)">Streak</div></div>
+      </div>
+    </div>`;
+  } else if (screen === 'stats') {
+    const areas = [
+      {key:'reasoning', label:'🧩 Ragionamento', color:'#6c63ff'},
+      {key:'spatial', label:'🔄 Spazio', color:'#00d4aa'},
+      {key:'verbalLogic', label:'📝 Logica Verbale', color:'#ffd700'},
+      {key:'sequences', label:'🔢 Sequenze', color:'#ff6b6b'},
+    ];
+    const totalEx = areas.reduce((s,a) => s + (areaStats[a.key]?.total||0), 0);
+    
+    // Find weakest area
+    let weakest=null, lowestPct=101;
+    areas.forEach(a => {
+      const st = areaStats[a.key];
+      if(st && st.total>0) { const pct=Math.round((st.correct/st.total)*100); if(pct<lowestPct){lowestPct=pct;weakest=a;} }
+    });
+    
+    let barsHtml = '';
+    areas.forEach(a => {
+      const st = areaStats[a.key];
+      const total = st?.total||0;
+      const correct = st?.correct||0;
+      const pct = total>0 ? Math.round((correct/total)*100) : 0;
+      barsHtml += `<div style="margin-bottom:14px;text-align:left">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+          <span style="color:var(--text-primary)">${a.label}</span>
+          <span style="color:var(--text-secondary)">${total>0 ? `${pct}% (${correct}/${total})` : '—'}</span>
+        </div>
+        <div class="stats-bar-bg"><div class="stats-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${a.color},${a.color}cc)"></div></div>
+      </div>`;
+    });
+    
+    let encouragement = '';
+    if(weakest && lowestPct < 80) {
+      const msg = lowestPct < 50 
+        ? "Non mollare! Ogni missione ti fa migliorare 🚀" 
+        : "Sei sulla buona strada! Continua ad allenarti 💪";
+      encouragement = `<div style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;text-align:left">
+        <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px">💡 Suggerimento</div>
+        <div style="font-size:13px;color:var(--text-secondary)">La tua area più debole è <strong style="color:${weakest.color}">${weakest.label}</strong> (${lowestPct}%). ${msg}</div>
+      </div>`;
+    } else if(totalEx > 0 && lowestPct >= 80) {
+      encouragement = `<div style="background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.3);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
+        <div style="font-size:14px;color:var(--accent-secondary);font-weight:600">🌟 Fantastico! Sei forte in tutte le aree!</div>
+      </div>`;
+    }
+    
+    html += `<div class="card" style="text-align:center">
+      <div style="font-size:40px;margin-bottom:8px">📊</div>
+      <h2 style="font-size:20px;color:var(--accent-primary);margin-bottom:4px">Statistiche</h2>
+      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">${totalEx>0 ? `Hai completato ${totalEx} esercizi in totale!` : 'Completa qualche missione per vedere le statistiche!'}</p>
+      ${barsHtml}
+      ${encouragement}
+      <button class="btn-primary" onclick="goHome()">⬅️ Torna alla Base</button>
+    </div>`;
+  } else if (screen === 'completed') {
+    html += `<div class="card" style="text-align:center">
+      <div style="font-size:64px;margin-bottom:16px">✅</div>
+      <h2 style="font-size:18px;color:var(--accent-secondary);margin-bottom:12px">Missione completata!</h2>
+      <p style="color:var(--text-secondary);margin-bottom:20px">Hai già completato la missione di oggi.<br>Torna domani per una nuova sfida!</p>
+      <div style="background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.3);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
+        <div style="font-size:24px;font-weight:700;color:var(--accent-secondary)">🔥 ${state.streak} giorni di fila</div>
+      </div>
+      <button class="btn-stats" onclick="showStats()">📊 Statistiche</button>
+    </div>`;
+  } else if (screen === 'playing') {
+    const ex = exercises[currentEx].gen(exercises[currentEx].seed, state.daysPlayed);
+    const typeLabels = {reasoning:'🧩 Ragionamento',spatial:'🔄 Spazio',verbalLogic:'📝 Logica',sequences:'🔢 Sequenze'};
+    const narrative = NARRATIVES[ex.type][Math.floor(Math.random()*3)];
+    
+    html += `<div style="width:100%;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:4px">
+        <span>${typeLabels[ex.type]}</span><span>${currentEx+1}/${exercises.length}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${((currentEx+1)/exercises.length)*100}%"></div></div>
+    </div>`;
+    html += `<div class="narrative">💬 ${narrative}</div>`;
+    html += `<div class="card">`;
+    
+    if (ex.type === 'reasoning') {
+      html += `<p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;text-align:center">Quale elemento completa la griglia?</p>`;
+      html += `<div class="matrix-grid">`;
+      ex.grid.flat().forEach(cell => {
+        if (cell === '?') html += `<div class="matrix-cell empty"><span style="color:var(--accent-primary);font-size:24px;font-weight:700">?</span></div>`;
+        else html += `<div class="matrix-cell"><span style="font-size:${cell.length>3?14:20}px">${cell}</span></div>`;
+      });
+      html += `</div>`;
+      html += `<div class="options-grid">`;
+      ex.options.forEach((opt,i) => {
+        html += `<div class="option-btn" onclick="selectAnswer(${i},'${encodeURIComponent(opt)}','${encodeURIComponent(ex.answer)}')"><span style="font-size:${opt.length>3?13:18}px">${opt}</span></div>`;
+      });
+      html += `</div>`;
+    } else if (ex.type === 'spatial') {
+      html += `<p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;text-align:center">${ex.label}</p>`;
+      html += `<div style="display:flex;justify-content:center;margin:16px 0">
+        <div style="width:80px;height:80px;display:flex;align-items:center;justify-content:center;background:var(--bg-card-hover);border-radius:var(--radius-sm);border:2px solid var(--accent-primary);font-size:36px">${ex.target}</div>
+      </div>`;
+      html += `<div class="options-grid">`;
+      ex.options.forEach((opt,i) => {
+        html += `<div class="option-btn" style="font-size:28px" onclick="selectAnswer(${i},'${encodeURIComponent(opt)}','${encodeURIComponent(ex.answer)}')">${opt}</div>`;
+      });
+      html += `</div>`;
+    } else if (ex.type === 'verbalLogic') {
+      html += `<p style="font-size:16px;color:var(--text-primary);margin-bottom:8px;font-weight:600;text-align:center">${ex.object}</p>`;
+      html += `<p style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;text-align:center">Seleziona ${ex.numToSelect} elementi ESSENZIALI:</p>`;
+      html += `<div class="options-grid" style="grid-template-columns:1fr">`;
+      ex.options.forEach((opt,i) => {
+        html += `<div class="option-btn" id="vl-${i}" onclick="selectVerbal(${i},'${encodeURIComponent(opt)}')">${opt}</div>`;
+      });
+      html += `</div>`;
+      window._vlCorrect = ex.correct;
+      window._vlNumToSelect = ex.numToSelect;
+      window._vlSelected = [];
+    } else if (ex.type === 'sequences') {
+      html += `<p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;text-align:center">Quale viene dopo?</p>`;
+      html += `<div class="sequence-display">`;
+      ex.sequence.forEach((item,i) => {
+        html += `<span class="seq-item">${item}</span>`;
+        if(i<ex.sequence.length-1) html += `<span style="color:var(--text-muted)">→</span>`;
+      });
+      html += `<span style="color:var(--text-muted)">→</span><span class="seq-item seq-missing">?</span></div>`;
+      html += `<div class="options-grid">`;
+      ex.options.forEach((opt,i) => {
+        html += `<div class="option-btn" onclick="selectAnswer(${i},'${encodeURIComponent(opt)}','${encodeURIComponent(ex.answer)}')">${opt}</div>`;
+      });
+      html += `</div>`;
+    }
+    
+    html += `<div id="feedback" style="margin-top:16px;text-align:center;font-size:14px;font-weight:600;min-height:24px"></div>`;
+    html += `</div>`;
+  } else if (screen === 'results') {
+    const correct = results.filter(r=>r.correct).length;
+    const total = results.length;
+    const pct = Math.round((correct/total)*100);
+    const grade = pct>=90 ? {e:'🏆',t:'Eccezionale!',c:'var(--accent-gold)'} : pct>=70 ? {e:'⭐',t:'Ottimo!',c:'var(--accent-secondary)'} : pct>=50 ? {e:'👍',t:'Buon inizio!',c:'var(--accent-primary)'} : {e:'💪',t:'Continua così!',c:'var(--text-secondary)'};
+    const xp = correct*10 + (correct===total?20:0) + Math.min(state.streak*5,50);
+    
+    html += `<div class="card" style="text-align:center">
+      <div style="font-size:64px;margin-bottom:12px">${grade.e}</div>
+      <h2 style="font-size:20px;color:${grade.c};margin-bottom:8px">${grade.t}</h2>
+      <p style="color:var(--text-secondary);font-size:14px;margin-bottom:20px">${correct}/${total} risposte corrette</p>
+      <div style="background:var(--bg-card-hover);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px;text-align:left">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px">
+          <span style="color:var(--text-secondary)">Risposte corrette</span>
+          <span style="color:var(--accent-secondary);font-weight:700">+${correct*10} XP</span>
+        </div>
+        ${correct===total?`<div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px"><span style="color:var(--text-secondary)">Bonus perfezione! 🎯</span><span style="color:var(--accent-gold);font-weight:700">+20 XP</span></div>`:''}
+        ${state.streak>0?`<div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px"><span style="color:var(--text-secondary)">Bonus streak 🔥</span><span style="color:var(--accent-gold);font-weight:700">+${Math.min(state.streak*5,50)} XP</span></div>`:''}
+        <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
+        <div style="display:flex;justify-content:space-between;font-size:16px"><span style="font-weight:700">Totale</span><span style="color:var(--accent-gold);font-weight:700">+${xp} XP</span></div>
+      </div>
+      <button class="btn-primary" onclick="finishMission(${xp})">🏠 Torna alla Base</button>
+    </div>`;
+  }
+  
+  app.innerHTML = html;
+}
+
+// Stars
+(function(){const s=document.getElementById('stars');for(let i=0;i<40;i++){const d=document.createElement('div');d.className='star';d.style.left=Math.random()*100+'%';d.style.top=Math.random()*100+'%';d.style.animationDelay=Math.random()*3+'s';d.style.width=d.style.height=(1+Math.random()*2)+'px';s.appendChild(d);}})();
+
+// Actions
+window.startMission = function() { generateExercises(); currentEx=0; results=[]; screen='playing'; render(); };
+window.showStats = function() { screen='stats'; render(); };
+window.goHome = function() { screen='welcome'; render(); };
+
+window.selectAnswer = function(idx, selected, correct) {
+  const sel = decodeURIComponent(selected);
+  const cor = decodeURIComponent(correct);
+  const isCorrect = sel === cor;
+  const exType = exercises[currentEx].gen === genReasoning ? 'reasoning' : exercises[currentEx].gen === genSpatial ? 'spatial' : exercises[currentEx].gen === genSequence ? 'sequences' : 'verbalLogic';
+  results.push({correct: isCorrect, type: exType});
+  
+  // Show feedback
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn,i) => {
+    btn.style.pointerEvents = 'none';
+    if (decodeURIComponent(btn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]||'') === cor || btn.textContent.trim() === cor) btn.classList.add('correct');
+    else if (i === idx && !isCorrect) btn.classList.add('wrong');
+  });
+  document.getElementById('feedback').innerHTML = isCorrect 
+    ? '<span style="color:var(--accent-secondary)">✅ Corretto! +10 XP</span>'
+    : '<span style="color:var(--accent-warning)">❌ Non esatto</span>';
+  
+  setTimeout(() => { currentEx++; if(currentEx>=exercises.length) screen='results'; render(); }, 1200);
+};
+
+window._vlSelected = [];
+window.selectVerbal = function(idx, opt) {
+  const decoded = decodeURIComponent(opt);
+  const el = document.getElementById('vl-'+idx);
+  if (window._vlSelected.includes(decoded)) {
+    window._vlSelected = window._vlSelected.filter(s=>s!==decoded);
+    el.style.borderColor = 'var(--border)';
+    el.style.background = 'var(--bg-card-hover)';
+  } else {
+    window._vlSelected.push(decoded);
+    el.style.borderColor = 'var(--accent-primary)';
+    el.style.background = 'rgba(108,99,255,0.15)';
+  }
+  if (window._vlSelected.length === window._vlNumToSelect) {
+    const isCorrect = window._vlSelected.every(s => window._vlCorrect.includes(s));
+    results.push({correct: isCorrect, type: 'verbalLogic'});
+    // Highlight
+    document.querySelectorAll('.option-btn').forEach((btn,i) => {
+      btn.style.pointerEvents = 'none';
+      if (window._vlCorrect.includes(btn.textContent)) btn.classList.add('correct');
+      else if (window._vlSelected.includes(btn.textContent) && !window._vlCorrect.includes(btn.textContent)) btn.classList.add('wrong');
+    });
+    document.getElementById('feedback').innerHTML = isCorrect 
+      ? '<span style="color:var(--accent-secondary)">✅ Corretto! +10 XP</span>'
+      : '<span style="color:var(--accent-warning)">❌ Non esatto</span>';
+    setTimeout(() => { currentEx++; if(currentEx>=exercises.length) screen='results'; render(); }, 1500);
+  }
+};
+
+window.finishMission = function(xp) {
+  state.totalXP += xp;
+  state.daysPlayed++;
+  state.completedToday = true;
+  state.lastPlayedDay = today;
+  state.streak = (state.lastPlayedDay === today-1 || state.streak > 0) ? state.streak+1 : 1;
+  saveState(state);
+  
+  // Update per-area stats
+  results.forEach(r => {
+    if(areaStats[r.type]) {
+      areaStats[r.type].total++;
+      if(r.correct) areaStats[r.type].correct++;
+    }
+  });
+  saveStats(areaStats);
+  
+  screen = 'completed';
+  render();
+};
+
+render();
+
+// Service Worker: active only when deployed
+
+</script>
+</body>
+</html>
